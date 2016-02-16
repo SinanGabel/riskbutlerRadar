@@ -9,4 +9,4 @@ Description: Utility functions for riskbutler.com
 License: Innova Financial Solutions ApS legal terms (http://ifs.dk/en/legal/)
 LazyData: TRUE
 Imports: RSQLite, yuima, Quandl, testthat
-Depends: R (>= 3.2.2)
+Depends: R (>= 3.2.2), DBI
