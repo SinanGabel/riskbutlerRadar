@@ -11,8 +11,8 @@
 #' @return tabular data
 #' @export
 #'
-sqliteget <- function(url = "////abs_path/my.db", stmt = "SELECT * FROM stdin LIMIT 100") {
-  con <- RSQLite::dbConnect(RSQLite::SQLite(), dbname = url, flags = SQLITE_RO)
+sqliteget <- function(url = "/abs_path/my.db", stmt = "SELECT * FROM stdin LIMIT 100") {
+  con <- RSQLite::dbConnect(RSQLite::SQLite(), dbname = url)
   res <- RSQLite::dbGetQuery(conn = con, statement = stmt)
   RSQLite::dbDisconnect(con)
   return(res)
