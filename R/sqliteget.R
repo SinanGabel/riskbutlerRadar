@@ -12,9 +12,9 @@
 #' @export
 #'
 sqliteget <- function(url = "////abs_path/my.db", stmt = 'SELECT * FROM stdin LIMIT 100') {
-  con <- dbConnect(RSQLite::SQLite(), dbname = url)
-  res <- dbGetQuery(conn = con, statement = stmt)
-  dbDisconnect(con)
+  con <- RSQLite::dbConnect(RSQLite::SQLite(), dbname = url)
+  res <- RSQLite::dbGetQuery(conn = con, statement = stmt)
+  RSQLite::dbDisconnect(con)
   return(res)
 }
 
