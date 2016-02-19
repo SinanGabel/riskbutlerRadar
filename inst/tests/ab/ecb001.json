@@ -1,0 +1,1 @@
+{"url": "/home/ubuntu/sql/ecb.db", "stmt": "SELECT * FROM stdin where \"code\" in (\"USD\", \"EUR\") limit 3000"}

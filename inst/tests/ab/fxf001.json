@@ -1,0 +1,1 @@
+{"url": "/home/ubuntu/sql/fxf.db", "stmt": "SELECT * FROM stdin where \"code\" in (\"USDJPY\", \"EURUSD\") and \"date\"=\"20160218\" " }
