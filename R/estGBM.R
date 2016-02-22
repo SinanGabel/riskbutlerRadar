@@ -11,7 +11,7 @@ estGBM <- function() {
   n <- 252 * T
 
   # simulate some data for the estimation (alternatively use real data)
-  mod <- yuima::simulate(mod, xinit = 100, true.parameter = list(mu = 0.10, sigma = 0.1), sampling = setSampling(Terminal = T, n = n))
+  mod <- yuima::simulate(mod, xinit = 100, true.parameter = list(mu = 0.10, sigma = 0.1), sampling = yuima::setSampling(Terminal = T, n = n))
 
   # estimate
   # the likelihood function measures how likelihood a set of parameters is given the observed data
