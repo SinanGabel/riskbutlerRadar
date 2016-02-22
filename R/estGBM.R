@@ -17,7 +17,7 @@ estGBM <- function() {
   # the likelihood function measures how likelihood a set of parameters is given the observed data
   mle <- yuima::qmle(mod, start = list(mu = 0.10, sigma = 0.1), lower = list(mu = 0, sigma = 0), upper = list(mu = 0.50, sigma = 1))
   res <- stats4::summary(mle)
-  res <- list( m2logL = res@m2logL, coef = jsonlite::toJSON(res@coef), call = res@call )
+  res <- list( m2logL = res@m2logL, coef = jsonlite::toJSON(res@coef), call = toString(res@call) )
   return(res)
 }
 
