@@ -32,7 +32,7 @@ test_that("sqliteget", {
   # write data to disk
   dbWriteTable(conn = db, name = "mydata", value = "./mydata.csv", row.names = FALSE, header = TRUE)
   on.exit(file.remove("./mydata.db"))
-  on.exit(file.remove("./mydata.csv"))
+  on.exit(file.remove("./mydata.csv"), add = TRUE)
   dbDisconnect(db)
 
   expect_that( all.equal(read.csv("./mydata.csv"), sqlite.get(url = "./mydata.db", stmt = "select * from mydata")), is_true() )

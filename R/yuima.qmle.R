@@ -24,6 +24,7 @@ yuima.qmle <- function(p_drift = "mu * x", p_diffusion = "sigma * x", p_method="
 }
 
 # test t with missing observations, any difference?
+# eval(parse(text="list(mu = 0.10, sigma = 0.1)")) converts from string of list => to list
 
 # library(radar)
 # yuima.qmle(p_drift = "mu * x", p_diffusion = "sigma * x", p_method="L-BFGS-B", p_start = list(mu = 0.10, sigma = 0.1), p_lower = list(mu = 0, sigma = 0), p_upper = list(mu = 0.50, sigma = 1), p_data = log(ar))

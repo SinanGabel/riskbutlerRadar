@@ -56,14 +56,26 @@
 
   <h1>A Very Simple DPU</h1>
 
-  <button class="pure-button" id="submitbutton">Calculate sim_ou</button>
+  <button class="pure-button" id="submitbutton1">Calculate sim_ou</button>
 
 
   <div class="pure-g">
-    <div class="pure-u-1 pure-u-md-1-2" id="output"></div>
+    <div class="pure-u-1 pure-u-md-1-2" id="output1"></div>
     <div class="pure-u-1 pure-u-md-1-2" id="result"></div>
   </div>
 
+
+<!-- new example -->
+
+  <textarea id="input" rows="4" cols="50">
+  x = rnorm(1000)
+  plot(x)
+  mean(x)
+  </textarea>
+
+  <br /> <button id="submitbutton2" type="button">Call R</button>
+
+  <pre><code id="output2"></code></pre>
 
 
 </div>
@@ -89,9 +101,9 @@ PRODUCTION: ENABLE TO HERE -->
 ocpu.seturl("https://riskbutler.net/ocpu/github/sinangabel/radar/R")
 
 //call R function: stats::sd(x=data)
-$("#submitbutton").click(function() {
+$("#submitbutton1").click(function() {
 
-  var code = "USD";
+  var code = "USD", data;
 
   // _.reduceRight(["A","B","C"], function(a, b) { return b + ", " + a; }, ""); => "A, B, C, "
 
@@ -101,14 +113,16 @@ $("#submitbutton").click(function() {
   // Model estimation; back testing; model selection
 
   // {code: dkk, date: 2016-02-11, close: 5.4321}
-  var req = ocpu.rpc("sqliteget", {
+  var req = ocpu.rpc("sqlite.get", {
     "url": "/home/ubuntu/sql/ecb.db",
     "stmt": 'SELECT * FROM stdin where "code" = "' + code + '"'
   }, function(output) {
 
-  var data = _.map(output, function(v,k) {return {"value": v.CLOSE, "date": new Date(v.DATE) }; });
+  data = _.map(output, function(v,k) {return {"value": v.CLOSE, "date": new Date(v.DATE) }; });
 
   //$("#output").text(JSON.stringify(output));
+
+
 
   console.log(data);
 
@@ -134,9 +148,51 @@ $("#submitbutton").click(function() {
     alert("R returned an error: " + JSON.stringify(req.responseText));
   });
 
+/*
+// yuima.qmle estimation
+  ocpu.rpc("yuima.qmle", {
+    "p_drift": "mu * x",
+    "p_diffusion": "sigma * x",
+    "p_method": "L-BFGS-B",
+    "p_start": "list(mu = 0.10, sigma = 0.1)",
+    "p_lower": "list(mu = 0, sigma = 0)",
+    "p_upper": "list(mu = 0.50, sigma = 1)",
+    "p_data": _.pluck(data, "value") }, function(output) {console.log(output);})
+*/
 
 });
 
+
+// --- new example ---
+ocpu.seturl("https://riskbutler.net/ocpu/library/base/R")
+
+//actual handler
+$("#submitbutton2").on("click", function(){
+
+    //arguments
+    var mysnippet = new ocpu.Snippet($("#input").val());
+
+    //disable button
+    $("button").attr("disabled", "disabled");
+
+    //perform the request
+    var req = ocpu.call("identity", {
+        "x" : mysnippet
+    }, function(session){
+        session.getConsole(function(outtxt){
+            $("#output2").text(outtxt);
+        });
+    });
+
+    //if R returns an error, alert the error message
+    req.fail(function(){
+        alert("Server error: " + req.responseText);
+    });
+
+    req.always(function(){
+        $("button").removeAttr("disabled");
+    });
+});
 
 </script>
 
