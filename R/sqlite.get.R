@@ -13,11 +13,10 @@
 #' @return tabular data
 #' @export
 #'
-sqliteget <- function(url = "/abs_path/my.db", stmt = "SELECT * FROM stdin LIMIT 100") {
+sqlite.get <- function(url = "/abs_path/my.db", stmt = "SELECT * FROM stdin LIMIT 100") {
   con <- RSQLite::dbConnect(RSQLite::SQLite(), dbname = url)
-  res <- RSQLite::dbGetQuery(conn = con, statement = stmt)
-  RSQLite::dbDisconnect(con)
-  return(res)
+  on.exit(RSQLite::dbDisconnect(con))
+  RSQLite::dbGetQuery(conn = con, statement = stmt)
 }
 
-# curl 'https://riskbutler.net/ocpu/github/sinangabel/radar/R/sqliteget/json' -H "Content-Type: application/json" -d '{"url": "/home/ubuntu/sql/ecb.db", "stmt": "SELECT * FROM stdin where \"code\"=\"DKK\" LIMIT 10" }'
+# curl 'https://riskbutler.net/ocpu/github/sinangabel/radar/R/sqlite.get/json' -H "Content-Type: application/json" -d '{"url": "/home/ubuntu/sql/ecb.db", "stmt": "SELECT * FROM stdin where \"code\"=\"DKK\" LIMIT 10" }'
