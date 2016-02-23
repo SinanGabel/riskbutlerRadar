@@ -141,6 +141,21 @@ $("#submitbutton1").click(function() {
   y_accessor: "value"
   });
 
+
+  // yuima.qmle estimation
+  var l1 = new ocpu.Snippet("list(mu = 0.10, sigma = 0.1)");
+  var l2 = new ocpu.Snippet("list(mu = 0, sigma = 0)");
+  var l3 = new ocpu.Snippet("list(mu = 0.50, sigma = 1)");
+
+  ocpu.call("yuima.qmle", {
+    "p_drift": "mu * x",
+    "p_diffusion": "sigma * x",
+    "p_method": "L-BFGS-B",
+    "p_start": l1,
+    "p_lower": l2,
+    "p_upper": l3,
+    "p_data": _.pluck(data, "value") }, function(output) {console.log(output);})
+
   });
 
   //optional
@@ -148,23 +163,15 @@ $("#submitbutton1").click(function() {
     alert("R returned an error: " + JSON.stringify(req.responseText));
   });
 
-/*
-// yuima.qmle estimation
-  ocpu.rpc("yuima.qmle", {
-    "p_drift": "mu * x",
-    "p_diffusion": "sigma * x",
-    "p_method": "L-BFGS-B",
-    "p_start": "list(mu = 0.10, sigma = 0.1)",
-    "p_lower": "list(mu = 0, sigma = 0)",
-    "p_upper": "list(mu = 0.50, sigma = 1)",
-    "p_data": _.pluck(data, "value") }, function(output) {console.log(output);})
-*/
+
+
+
 
 });
 
-
+/*
 // --- new example ---
-ocpu.seturl("https://riskbutler.net/ocpu/library/base/R")
+//ocpu.seturl("https://riskbutler.net/ocpu/library/base/R")
 
 //actual handler
 $("#submitbutton2").on("click", function(){
@@ -193,6 +200,8 @@ $("#submitbutton2").on("click", function(){
         $("button").removeAttr("disabled");
     });
 });
+*/
+
 
 </script>
 
