@@ -2,7 +2,7 @@
 #'
 #' Currently univariate models, example given for GBM
 #'
-#' @param data  init*exp(rnorm(100, mean=0, sd=0.10)) where init=100
+#' @param data  init*exp(rnorm(100, mean=0, sd=0.10)) where init=100, possibly use log and return of data
 #' @param drift  "mu * x"
 #' @param diffusion  "sigma * x"
 #' @param start  list(mu = 0.10, sigma = 0.1)
