@@ -140,8 +140,12 @@ $("#submitbutton1").click(function() {
     "start": l1,
     "lower": l2,
     "upper": l3,
-    "data": _.pluck(data, "value") }, function(output) {console.log(output); document.getElementById("output1").textContent = output; })
-
+    "data": _.pluck(data, "value") }, function(ses) {
+        console.log(ses);
+        ses.getConsole(function(res) {
+            document.getElementById("output1").textContent = res;
+        });
+    });
   });
 
   //optional
@@ -149,12 +153,7 @@ $("#submitbutton1").click(function() {
     alert("R returned an error: " + JSON.stringify(req.responseText));
   });
 
-
-
-
-
 });
-
 
 
 </script>

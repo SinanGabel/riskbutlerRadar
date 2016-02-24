@@ -12,7 +12,7 @@
 #' @return maximum likelihood estimation
 #' @export
 #'
-yuima.qmle <- function(data, drift, diffusion, start, ...) {
+yuima.qmle <- function(data, summary = TRUE, drift, diffusion, start, ...) {
 
   data <- yuima::setData(data.frame(y = data))
   yobj <- yuima::setModel(drift, diffusion)
@@ -20,7 +20,12 @@ yuima.qmle <- function(data, drift, diffusion, start, ...) {
 
   # estimate
   # the likelihood function measures how likelihood a set of parameters is given the observed data
-  yuima::qmle(yobj, start, ...)
+  res <- yuima::qmle(yobj, start, ...)
+
+  if (summary == TRUE)
+    return(mlefilter(res))
+  else
+    return(res)
 }
 
 # library(radar)
