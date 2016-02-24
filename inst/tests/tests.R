@@ -9,7 +9,7 @@ test_that("yuima.qmle", {
 
   set.seed(123)
   ar <- 100*exp(rnorm(100, mean=0, sd=0.10))
-  X <- yuima.qmle(p_drift = "mu * x", p_diffusion = "sigma * x", p_method="L-BFGS-B", p_start = list(mu = 0.10, sigma = 0.1), p_lower = list(mu = 0, sigma = 0), p_upper = list(mu = 0.50, sigma = 1), p_data = log(ar))
+  X <- yuima.qmle(data = log(ar), drift = "mu * x", diffusion = "sigma * x", method="L-BFGS-B", start = list(mu = 0.10, sigma = 0.1), lower = list(mu = 0, sigma = 0), upper = list(mu = 0.50, sigma = 1))
   X <- stats4::summary(X)
   X <- as.data.frame(X@coef)
 

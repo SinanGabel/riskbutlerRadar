@@ -64,20 +64,6 @@
     <div class="pure-u-1 pure-u-md-1-2" id="result"></div>
   </div>
 
-
-<!-- new example -->
-
-  <textarea id="input" rows="4" cols="50">
-  x = rnorm(1000)
-  plot(x)
-  mean(x)
-  </textarea>
-
-  <br /> <button id="submitbutton2" type="button">Call R</button>
-
-  <pre><code id="output2"></code></pre>
-
-
 </div>
 
 <!-- PRODUCTION: ENABLE FROM HERE
@@ -148,13 +134,13 @@ $("#submitbutton1").click(function() {
   var l3 = new ocpu.Snippet("list(mu = 0.50, sigma = 1)");
 
   ocpu.call("yuima.qmle", {
-    "p_drift": "mu * x",
-    "p_diffusion": "sigma * x",
-    "p_method": "L-BFGS-B",
-    "p_start": l1,
-    "p_lower": l2,
-    "p_upper": l3,
-    "p_data": _.pluck(data, "value") }, function(output) {console.log(output);})
+    "drift": "mu * x",
+    "diffusion": "sigma * x",
+    "method": "L-BFGS-B",
+    "start": l1,
+    "lower": l2,
+    "upper": l3,
+    "data": _.pluck(data, "value") }, function(output) {console.log(output); document.getElementById("output1").textContent = output; })
 
   });
 
@@ -169,38 +155,6 @@ $("#submitbutton1").click(function() {
 
 });
 
-/*
-// --- new example ---
-//ocpu.seturl("https://riskbutler.net/ocpu/library/base/R")
-
-//actual handler
-$("#submitbutton2").on("click", function(){
-
-    //arguments
-    var mysnippet = new ocpu.Snippet($("#input").val());
-
-    //disable button
-    $("button").attr("disabled", "disabled");
-
-    //perform the request
-    var req = ocpu.call("identity", {
-        "x" : mysnippet
-    }, function(session){
-        session.getConsole(function(outtxt){
-            $("#output2").text(outtxt);
-        });
-    });
-
-    //if R returns an error, alert the error message
-    req.fail(function(){
-        alert("Server error: " + req.responseText);
-    });
-
-    req.always(function(){
-        $("button").removeAttr("disabled");
-    });
-});
-*/
 
 
 </script>

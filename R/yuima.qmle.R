@@ -2,29 +2,27 @@
 #'
 #' Currently univariate models, example given for GBM
 #'
-#' @param p_drift  "mu * x"
-#' @param p_diffusion  "sigma * x"
-#' @param p_method  "L-BFGS-B"
-#' @param p_start  list(mu = 0.10, sigma = 0.1)
-#' @param p_lower  list(mu = 0, sigma = 0)
-#' @param p_upper  list(mu = 0.50, sigma = 1)
-#' @param p_data  init*exp(rnorm(100, mean=0, sd=0.10)) where init=100
+#' @param data  init*exp(rnorm(100, mean=0, sd=0.10)) where init=100
+#' @param drift  "mu * x"
+#' @param diffusion  "sigma * x"
+#' @param start  list(mu = 0.10, sigma = 0.1)
+#' @param method  [optional] "L-BFGS-B" with lower, upper and "BFGS" without bounds
+#' @param lower  [optional] list(mu = 0, sigma = 0)
+#' @param upper  [optional] list(mu = 0.50, sigma = 1)
 #' @return maximum likelihood estimation
 #' @export
 #'
-yuima.qmle <- function(p_drift = "mu * x", p_diffusion = "sigma * x", p_method="L-BFGS-B", p_start = list(), p_lower = list(), p_upper = list(), p_data = 1:10) {
+yuima.qmle <- function(data, drift, diffusion, start, ...) {
 
-  data <- yuima::setData(data.frame(y = p_data))
-  mod <- yuima::setModel(p_drift, p_diffusion)
-  mod <- yuima::setYuima(model = mod, data = data)
+  data <- yuima::setData(data.frame(y = data))
+  yobj <- yuima::setModel(drift, diffusion)
+  yobj <- yuima::setYuima(model = yobj, data = data)
 
   # estimate
   # the likelihood function measures how likelihood a set of parameters is given the observed data
-  yuima::qmle(mod, method = p_method, start = p_start, lower = p_lower, upper = p_upper)
+  yuima::qmle(yobj, start, ...)
 }
 
-# test t with missing observations, any difference?
-# eval(parse(text="list(mu = 0.10, sigma = 0.1)")) converts from string of list => to list
-
 # library(radar)
-# yuima.qmle(p_drift = "mu * x", p_diffusion = "sigma * x", p_method="L-BFGS-B", p_start = list(mu = 0.10, sigma = 0.1), p_lower = list(mu = 0, sigma = 0), p_upper = list(mu = 0.50, sigma = 1), p_data = log(ar))
+# yuima.qmle(data = log(ar), drift = "mu * x", diffusion = "sigma * x", method="L-BFGS-B", start = list(mu = 0.10, sigma = 0.1), lower = list(mu = 0, sigma = 0), upper = list(mu = 0.50, sigma = 1))
+
