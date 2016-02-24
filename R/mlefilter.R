@@ -7,5 +7,5 @@
 #'
 mlefilter <- function(mle) {
   res <- stats4::summary(mle)
-  list( m2logL = res@m2logL, coef = jsonlite::toJSON(as.data.frame(res@coef)), call = toString(res@call) )
+  list( m2logL = res@m2logL, coef = as.data.frame(res@coef), call = toString(res@call) )
 }

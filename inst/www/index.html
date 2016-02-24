@@ -142,9 +142,14 @@ $("#submitbutton1").click(function() {
     "upper": l3,
     "data": _.pluck(data, "value") }, function(ses) {
         console.log(ses);
-        ses.getConsole(function(res) {
+        ses.getObject(function(res) {
+            console.log(res.m2logL[0], JSON.parse(res.coef[0]), res.call[0]);
+            //document.getElementById("output1").textContent = res;
+        });
+/*        ses.getConsole(function(res) {
             document.getElementById("output1").textContent = res;
         });
+*/
     });
   });
 
