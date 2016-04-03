@@ -1,13 +1,13 @@
 Package: radar
 Type: Package
 Title: Utility functions for riskbutler.com
-Version: 0.1
+Version: 0.11
 Date: 2016-02-16
 Author: Sinan
 Maintainer: Who to complain to <sinan.gabel@gmail.com>
 Description: Utility functions for riskbutler.com
 License: Innova Financial Solutions ApS legal terms (http://ifs.dk/en/legal/)
 LazyData: TRUE
-Imports: RSQLite, yuima, Quandl, stats4, base
+Imports: RSQLite, yuima, stats4, jsonlite, sde
 Depends: R (>= 3.2.2), DBI
 Suggests: testthat

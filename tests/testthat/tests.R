@@ -19,6 +19,15 @@ test_that("yuima.qmle", {
   expect_that( abs(X$Estimate[2] - 0.0002952567) < 1e-5, is_true() )
 })
 
+test_that("yuima.simulate", {
+
+  set.seed(123)
+  X <- yuima.simulate(setModel(drift = "mu * x", diffusion = "sigma * x"), sumsim = TRUE, nsim = 100, xinit = 100, true.parameter = list(mu = 0.1, sigma = 0.07), sampling = setSampling(Terminal = 1, n = 10))
+
+  expect_that( abs(stats::sd(X) - 353.9682) < 1e-5, is_true() )
+  expect_that( abs(mean(X) - 10541.72) < 1e-5, is_true() )
+})
+
 
 test_that("sqliteget", {
 
