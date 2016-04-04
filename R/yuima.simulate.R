@@ -14,7 +14,6 @@
 #' @export
 #'
 #'
-#'yuima.simulate <- function(object, sumsim = TRUE, nsim = 1, ...) {
 yuima.simulate <- function(sumsim = TRUE, nsim = 1, drift, diffusion, xinit = 1, Terminal = 1, n = 1, parameter = list()) {
 
   ymod <- yuima::setModel(drift, diffusion)
@@ -52,7 +51,5 @@ yuima.simulate <- function(sumsim = TRUE, nsim = 1, drift, diffusion, xinit = 1,
 
 # note: sumsim, nsim and n
 
-# X <- yuima.simulate(setModel(drift = "mu * x", diffusion = "sigma * x"), sumsim = FALSE, nsim = 1, xinit = 100, true.parameter = list(mu = 0.1, sigma = 0.07), sampling = setSampling(Terminal = 1, n = 10))
-
-# X <- yuima.simulate(setModel(drift = "mu * x", diffusion = "sigma * x"), sumsim = TRUE, nsim = 100, xinit = 100, true.parameter = list(mu = 0.1, sigma = 0.07), sampling = setSampling(Terminal = 1, n = 10))
+# X <- yuima.simulate(drift = "mu * x", diffusion = "sigma * x", sumsim = TRUE, nsim = 100, xinit = 100, parameter = list(mu = 0.1, sigma = 0.07), Terminal = 1, n = 10)
 

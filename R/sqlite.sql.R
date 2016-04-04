@@ -1,4 +1,4 @@
-#' sqlite get
+#' sqlite sql
 #'
 #' Connects to db, makes a query to db, closes connection to db
 #'
@@ -13,10 +13,10 @@
 #' @return tabular data
 #' @export
 #'
-sqlite.get <- function(url, stmt) {
+sqlite.sql <- function(url, stmt) {
   con <- RSQLite::dbConnect(RSQLite::SQLite(), dbname = url)
   on.exit(RSQLite::dbDisconnect(con))
   RSQLite::dbGetQuery(conn = con, statement = stmt)
 }
 
-# curl 'https://riskbutler.net/ocpu/github/sinangabel/radar/R/sqlite.get/json' -H "Content-Type: application/json" -d '{"url": "/home/ubuntu/sql/ecb.db", "stmt": "SELECT * FROM stdin where \"code\"=\"DKK\" LIMIT 10" }'
+# curl 'https://riskbutler.net/ocpu/github/sinangabel/radar/R/sqlite.sql/json' -H "Content-Type: application/json" -d '{"url": "/home/ubuntu/sql/ecb.db", "stmt": "SELECT * FROM stdin where \"code\"=\"DKK\" LIMIT 10" }'

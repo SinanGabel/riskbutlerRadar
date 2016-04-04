@@ -33,7 +33,7 @@ test_that("yuima.simulate", {
 })
 
 
-test_that("sqliteget", {
+test_that("sqlite.sql", {
 
   # make some data
   mydata <- matrix(100*exp(rnorm(90, mean=0, sd=0.10)),ncol=3)
@@ -50,5 +50,5 @@ test_that("sqliteget", {
   on.exit(file.remove("./mydata.csv"), add = TRUE)
   dbDisconnect(db)
 
-  expect_that( all.equal(read.csv("./mydata.csv"), sqlite.get(url = "./mydata.db", stmt = "select * from mydata")), is_true() )
+  expect_that( all.equal(read.csv("./mydata.csv"), sqlite.sql(url = "./mydata.db", stmt = "select * from mydata")), is_true() )
 })
