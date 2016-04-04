@@ -2,23 +2,33 @@
 #'
 #' Multivariate models
 #'
-#' @param object yuima setModel() object e.g. setModel(drift = "mu * x", diffusion = "sigma * x", ...)
-#' @param sumsim sum simulations vertical (default TRUE)
+#' @param sumsim  sum simulations vertically (default TRUE)
 #' @param nsim number of simulations (default 1)
+#' @param drift  (e.g."mu * x")
+#' @param diffusion  (e.g. "sigma * x")
+#' @param xinit initial value vector of state variables (default 1)
+#' @param Terminal (default 1)
+#' @param n number of trading times (default 1)
+#' @param parameter named list of parameters (name true.parameter in yuima).
 #' @return simulations
 #' @export
 #'
-yuima.simulate <- function(object, sumsim = TRUE, nsim = 1, ...) {
+#'
+#'yuima.simulate <- function(object, sumsim = TRUE, nsim = 1, ...) {
+yuima.simulate <- function(sumsim = TRUE, nsim = 1, drift, diffusion, xinit = 1, Terminal = 1, n = 1, parameter = list()) {
+
+  ymod <- yuima::setModel(drift, diffusion)
+  ysam <- yuima::setSampling(Terminal, n)
 
   if (nsim == 1) {
-    s <- yuima::simulate(object, ...)
+    s <- yuima::simulate(ymod, ysam, xinit = xinit, true.parameter = parameter)
     return(s@data@original.data)
 
   } else if (sumsim == TRUE) {
       r <- c(0)
       m <- nsim
       for(i in 1:m) {
-        s <- yuima::simulate(object, ...)
+        s <- yuima::simulate(ymod, ysam, xinit = xinit, true.parameter = parameter)
         t <- s@data@original.data
         r <- r + t
     }
@@ -28,7 +38,7 @@ yuima.simulate <- function(object, sumsim = TRUE, nsim = 1, ...) {
       r <- c()
       m <- nsim
       for(i in 1:m) {
-        s <- yuima::simulate(object, ...)
+        s <- yuima::simulate(ymod, ysam, xinit = xinit, true.parameter = parameter)
         t <- s@data@original.data
         r <- cbind(r, t)
       }
