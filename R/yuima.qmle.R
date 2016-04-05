@@ -16,8 +16,8 @@
 yuima.qmle <- function(data, delta = 1/252, summary = TRUE, drift, diffusion, start, ...) {
 
   data <- yuima::setData(data.frame(y = data), delta = delta)
-  yobj <- yuima::setModel(drift, diffusion)
-  yobj <- yuima::setYuima(model = yobj, data = data)
+  ymod <- yuima::setModel(drift = drift, diffusion = diffusion)
+  yobj <- yuima::setYuima(model = ymod, data = data)
 
   # estimate
   # the likelihood function measures how likelihood a set of parameters is given the observed data

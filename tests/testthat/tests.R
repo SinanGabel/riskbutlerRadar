@@ -19,8 +19,8 @@ test_that("yuima.qmle", {
   X <- stats4::summary(X)
   X <- as.data.frame(X@coef)
 
-  expect_that( abs(X$Estimate[1] - 0.1036490351) < 1e-5, is_true() )
-  expect_that( abs(X$Estimate[2] - 0.0002952567) < 1e-5, is_true() )
+  expect_that( abs(X$Estimate[1] - 0.1041014143) < 1e-5, is_true() )
+  expect_that( abs(X$Estimate[2] - 0.0002923041) < 1e-5, is_true() )
 })
 
 test_that("yuima.simulate", {
@@ -28,8 +28,16 @@ test_that("yuima.simulate", {
   set.seed(123)
   X <- yuima.simulate(drift = "mu * x", diffusion = "sigma * x", sumsim = TRUE, nsim = 100, xinit = 100, parameter = list(mu = 0.1, sigma = 0.07), Terminal = 1, n = 10)
 
-  expect_that( abs(stats::sd(X) - 353.9682) < 1e-5, is_true() )
-  expect_that( abs(mean(X) - 10541.72) < 1e-5, is_true() )
+  expect_true( abs(stats::sd(X) - 353.9682) < 1e-2)
+  expect_true( abs(mean(X) - 10541.72) < 1e-2)
+  expect_true( length(X) == 11)
+
+  set.seed(123)
+  X <- yuima.simulate(drift = "mu * x", diffusion = "sigma * x", sumsim = TRUE, nsim = 1, xinit = 100, parameter = list(mu = 0.1, sigma = 0.07), Terminal = 1, n = 123)
+  expect_true( abs(stats::sd(X) - 4.305557) < 1e-2)
+  expect_true( abs(mean(X) - 107.0228) < 1e-2)
+  expect_true( length(X) == 124)
+
 })
 
 
