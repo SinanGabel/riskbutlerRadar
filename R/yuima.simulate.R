@@ -14,13 +14,18 @@
 #' @export
 #'
 #'
-yuima.simulate <- function(sumsim = TRUE, nsim = 1, drift, diffusion, xinit = 1, Terminal = 1, n = 100, parameter) {
+yuima.simulate <- function(setseed = FALSE, sumsim = TRUE, nsim = 1, drift, diffusion, xinit = 1, Terminal = 1, n = 100, parameter) {
 
   ymod <- yuima::setModel(drift = drift, diffusion = diffusion)
   ysam <- yuima::setSampling(Terminal = Terminal, n = n)
   yobj <- yuima::setYuima(model = ymod, sampling = ysam)
 
   if (nsim == 1) {
+
+    if (setseed == TRUE) {
+      set.seed(123)
+    }
+
     s <- yuima::simulate(yobj, xinit = xinit, true.parameter = parameter)
     return(s@data@original.data)
 
@@ -28,6 +33,11 @@ yuima.simulate <- function(sumsim = TRUE, nsim = 1, drift, diffusion, xinit = 1,
       r <- c(0)
       m <- nsim
       for(i in 1:m) {
+
+        if (setseed == TRUE) {
+          set.seed(123)
+        }
+
         s <- yuima::simulate(yobj, xinit = xinit, true.parameter = parameter)
         t <- s@data@original.data
         r <- r + t
@@ -38,6 +48,11 @@ yuima.simulate <- function(sumsim = TRUE, nsim = 1, drift, diffusion, xinit = 1,
       r <- c()
       m <- nsim
       for(i in 1:m) {
+
+        if (setseed == TRUE) {
+          set.seed(123)
+        }
+
         s <- yuima::simulate(yobj, xinit = xinit, true.parameter = parameter)
         t <- s@data@original.data
         r <- cbind(r, t)
