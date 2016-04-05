@@ -67,5 +67,5 @@ yuima.simulate <- function(setseed = FALSE, sumsim = TRUE, nsim = 1, drift, diff
 
 # note: sumsim, nsim and n
 
-# X <- yuima.simulate(drift = "mu * x", diffusion = "sigma * x", sumsim = TRUE, nsim = 100, xinit = 100, parameter = list(mu = 0.1, sigma = 0.07), Terminal = 1, n = 10)
+# X <- yuima.simulate(setseed = FALSE, drift = "mu * x", diffusion = "sigma * x", sumsim = TRUE, nsim = 100, xinit = 100, parameter = list(mu = 0.1, sigma = 0.07), Terminal = 1, n = 10)
 
