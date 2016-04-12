@@ -6,6 +6,8 @@
 #' @param delta  1 divided by the # of observations per year e.g. with business daily data typically: 1/252
 #' @param drift  "mu * x"
 #' @param diffusion  "sigma * x"
+#' @param hurst 0.5
+#' @param solve.variable "x"
 #' @param start  list(mu = 0.10, sigma = 0.1)
 #' @param method  [optional] "L-BFGS-B" with lower, upper and "BFGS" without bounds
 #' @param lower  [optional] list(mu = 0, sigma = 0)
@@ -13,10 +15,10 @@
 #' @return maximum likelihood estimation
 #' @export
 #'
-yuima.qmle <- function(data, delta = 1/252, summary = TRUE, drift, diffusion, start, ...) {
+yuima.qmle <- function(data, delta = 1/252, summary = TRUE, drift, diffusion, hurst = 0.5, solve.variable = "x", start, ...) {
 
   data <- yuima::setData(data.frame(y = data), delta = delta)
-  ymod <- yuima::setModel(drift = drift, diffusion = diffusion)
+  ymod <- yuima::setModel(drift = drift, diffusion = diffusion, hurst = hurst, solve.variable = solve.variable)
   yobj <- yuima::setYuima(model = ymod, data = data)
 
   # estimate
@@ -30,5 +32,6 @@ yuima.qmle <- function(data, delta = 1/252, summary = TRUE, drift, diffusion, st
 }
 
 # library(radar)
-# yuima.qmle(data = log(ar), delta = 1/(24*365), drift = "mu * x", diffusion = "sigma * x", method="L-BFGS-B", start = list(mu = 0.10, sigma = 0.1), lower = list(mu = 0, sigma = 0), upper = list(mu = 0.50, sigma = 1))
+# ar <- 100*exp(rnorm(100, mean=0, sd=0.10))
+# yuima.qmle(data = log(ar), delta = 1/(24*365), drift = "mu * x", diffusion = "sigma * x", hurst = 0.5, solve.variable = "x", method="L-BFGS-B", start = list(mu = 0.10, sigma = 0.1), lower = list(mu = 0, sigma = 0), upper = list(mu = 0.50, sigma = 1))
 

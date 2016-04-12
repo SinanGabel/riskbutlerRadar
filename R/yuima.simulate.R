@@ -6,6 +6,8 @@
 #' @param nsim number of simulations (default 1)
 #' @param drift  (e.g."mu * x")
 #' @param diffusion  (e.g. "sigma * x")
+#' @param hurst 0.5
+#' @param solve.variable "x"
 #' @param xinit initial value vector of state variables (default 1)
 #' @param Terminal (default 1)
 #' @param n number of trading times (default 1)
@@ -14,10 +16,10 @@
 #' @export
 #'
 #'
-yuima.simulate <- function(setseed = FALSE, sumsim = TRUE, nsim = 1, drift, diffusion, xinit = 1, Terminal = 1, n = 100, parameter) {
+yuima.simulate <- function(setseed = FALSE, sumsim = TRUE, nsim = 1, drift, diffusion, hurst = 0.5, solve.variable = "x", xinit = 1, Terminal = 1, n = 100, parameter, grid = NULL) {
 
-  ymod <- yuima::setModel(drift = drift, diffusion = diffusion)
-  ysam <- yuima::setSampling(Terminal = Terminal, n = n)
+  ymod <- yuima::setModel(drift = drift, diffusion = diffusion, hurst = hurst, solve.variable = solve.variable)
+  ysam <- yuima::setSampling(Terminal = Terminal, n = n, grid = grid)
   yobj <- yuima::setYuima(model = ymod, sampling = ysam)
 
   if (nsim == 1) {
@@ -27,7 +29,7 @@ yuima.simulate <- function(setseed = FALSE, sumsim = TRUE, nsim = 1, drift, diff
     }
 
     s <- yuima::simulate(yobj, xinit = xinit, true.parameter = parameter)
-    return(s@data@original.data)
+    return(s@data@original.data[-1,])
 
   } else if (sumsim == TRUE) {
       r <- c(0)
@@ -40,7 +42,7 @@ yuima.simulate <- function(setseed = FALSE, sumsim = TRUE, nsim = 1, drift, diff
 
         s <- yuima::simulate(yobj, xinit = xinit, true.parameter = parameter)
         t <- s@data@original.data
-        r <- r + t
+        r <- r + t[-1,]
     }
     return(r)
 
@@ -55,7 +57,8 @@ yuima.simulate <- function(setseed = FALSE, sumsim = TRUE, nsim = 1, drift, diff
 
         s <- yuima::simulate(yobj, xinit = xinit, true.parameter = parameter)
         t <- s@data@original.data
-        r <- cbind(r, t)
+        r <- rbind(r,t[-1,], deparse.level = 0)
+        #r <- cbind(r, t)
       }
       #avg <- apply(res, 1, mean)
       #vol <-  apply(res, 1, sd)
@@ -66,6 +69,5 @@ yuima.simulate <- function(setseed = FALSE, sumsim = TRUE, nsim = 1, drift, diff
 # library(radar)
 
 # note: sumsim, nsim and n
-
-# X <- yuima.simulate(setseed = FALSE, drift = "mu * x", diffusion = "sigma * x", sumsim = TRUE, nsim = 100, xinit = 100, parameter = list(mu = 0.1, sigma = 0.07), Terminal = 1, n = 10)
+# X <- yuima.simulate(setseed = FALSE, sumsim = FALSE, nsim = 10, drift = "mu * x", diffusion = "sigma * x", xinit = 100, hurst = 0.5, solve.variable = "x", Terminal = 1, n = 3, parameter = list(mu = 0.1, sigma = 0.07))
 

@@ -1,9 +1,9 @@
 Package: radar
 Type: Package
 Title: Utility functions for riskbutler.com
-Version: 0.11
-Date: 2016-02-16
-Author: Sinan
+Version: 0.2
+Date: 2016-04-12
+Author: Sinan Gabel
 Maintainer: Who to complain to <sinan.gabel@gmail.com>
 Description: Utility functions for riskbutler.com
 License: Innova Financial Solutions ApS legal terms (http://ifs.dk/en/legal/)

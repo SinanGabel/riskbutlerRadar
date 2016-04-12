@@ -15,7 +15,7 @@ test_that("yuima.qmle", {
 
   set.seed(123)
   ar <- 100*exp(rnorm(100, mean=0, sd=0.10))
-  X <- yuima.qmle(data = log(ar), delta = 1, summary = FALSE, drift = "mu * x", diffusion = "sigma * x", method="L-BFGS-B", start = list(mu = 0.10, sigma = 0.1), lower = list(mu = 0, sigma = 0), upper = list(mu = 0.50, sigma = 1))
+  X <- yuima.qmle(data = log(ar), delta = 1, summary = FALSE, drift = "mu * x", diffusion = "sigma * x", hurst = 0.5, solve.variable = "x", method="L-BFGS-B", start = list(mu = 0.10, sigma = 0.1), lower = list(mu = 0, sigma = 0), upper = list(mu = 0.50, sigma = 1))
   X <- stats4::summary(X)
   X <- as.data.frame(X@coef)
 
@@ -23,20 +23,21 @@ test_that("yuima.qmle", {
   expect_that( abs(X$Estimate[2] - 0.0002923041) < 1e-5, is_true() )
 })
 
+##
+# . test multivariate too; n > 1;
+# . ToDo: specify trading times i.e. the grid => see subsampling()
 test_that("yuima.simulate", {
 
-  set.seed(123)
-  X <- yuima.simulate(drift = "mu * x", diffusion = "sigma * x", sumsim = TRUE, nsim = 100, xinit = 100, parameter = list(mu = 0.1, sigma = 0.07), Terminal = 1, n = 10)
+    X <- yuima.simulate(setseed = TRUE, sumsim = FALSE, nsim = 1 , drift = "mu * x", diffusion = "sigma * x", hurst = 0.5, solve.variable = "x",  xinit = 100, parameter = list(mu = 0.1, sigma = 0.07), Terminal = 1, n = 10)
 
-  expect_true( abs(stats::sd(X) - 353.9682) < 1e-2)
-  expect_true( abs(mean(X) - 10541.72) < 1e-2)
-  expect_true( length(X) == 11)
+  expect_true( abs(stats::sd(X) - 5.397833) < 1e-2)
+  expect_true( abs(mean(X) - 108.1798) < 1e-2)
+  expect_true( length(X) == 10)
 
-  set.seed(123)
-  X <- yuima.simulate(drift = "mu * x", diffusion = "sigma * x", sumsim = TRUE, nsim = 1, xinit = 100, parameter = list(mu = 0.1, sigma = 0.07), Terminal = 1, n = 123)
-  expect_true( abs(stats::sd(X) - 4.305557) < 1e-2)
-  expect_true( abs(mean(X) - 107.0228) < 1e-2)
-  expect_true( length(X) == 124)
+  X <- yuima.simulate(setseed = TRUE, sumsim = FALSE, nsim = 1 , drift = "mu * x", diffusion = "sigma * x", hurst = 0.5, solve.variable = "x", xinit = 100, parameter = list(mu = 0.1, sigma = 0.07), Terminal = 1, n = 123)
+  expect_true( abs(stats::sd(X) - 4.275771) < 1e-2)
+  expect_true( abs(mean(X) - 107.0799) < 1e-2)
+  expect_true( length(X) == 123)
 
 })
 
