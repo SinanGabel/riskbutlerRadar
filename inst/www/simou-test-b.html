@@ -20,10 +20,10 @@
     <title>RiskButler.com&trade; examples</title>
 
     <!-- PRODUCTION: REMOVE FROM HERE -->
-    <link rel="stylesheet" type="text/css" href="css/pure-min.css">
-    <link rel="stylesheet" type="text/css" href="css/pure-grids-responsive-min.css">
+    <link rel="stylesheet" type="text/css" href="css/ext/pure-min.css">
+    <link rel="stylesheet" type="text/css" href="css/ext/pure-grids-responsive-min.css">
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="css/metricsgraphics.css">
+    <link rel="stylesheet" type="text/css" href="css/ext/metricsgraphics.css">
     <link rel="stylesheet" type="text/css" href="css/rb.css">
     <!-- PRODUCTION: REMOVE TO HERE -->
 
@@ -76,7 +76,7 @@
 PRODUCTION: ENABLE TO HERE -->
 
 <!-- OpenCPU client library -->
-<script src="js/ext/jquery-2.2.0.min.js"></script>
+<script src="js/ext/jquery-2.2.3.min.js"></script>
 <script src="js/ext/opencpu-0.5.min.js"></script>
 <script src="js/ext/d3.min.js"></script>
 <script src="js/ext/metricsgraphics.min.js"></script>
@@ -99,7 +99,7 @@ $("#submitbutton1").click(function() {
   // Model estimation; back testing; model selection
 
   // {code: dkk, date: 2016-02-11, close: 5.4321}
-  var req = ocpu.rpc("sqlite.get", {
+  var req = ocpu.rpc("sqlite.sql", {
     "url": "/home/ubuntu/sql/ecb.db",
     "stmt": 'SELECT * FROM stdin where "code" = "' + code + '"'
   }, function(output) {
@@ -134,13 +134,14 @@ $("#submitbutton1").click(function() {
   var l3 = new ocpu.Snippet("list(mu = 0.50, sigma = 1)");
 
   ocpu.call("yuima.qmle", {
+    "data": _.pluck(data, "value"),
     "drift": "mu * x",
     "diffusion": "sigma * x",
     "method": "L-BFGS-B",
     "start": l1,
     "lower": l2,
-    "upper": l3,
-    "data": _.pluck(data, "value") }, function(ses) {
+    "upper": l3
+ }, function(ses) {
         console.log(ses);
         ses.getObject(function(res) {
             console.log(JSON.parse(res));

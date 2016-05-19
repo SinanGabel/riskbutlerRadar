@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="copyright" content="Copyright 2016 Innova Financial Solutions ApS. All rights reserved.">
-  <meta name="application-name" content="RiskButler.com">
-  <meta name="description" content="Simulating the financial future for businesses and private investors!">
+  <meta name="application-name" content="Pricing control test">
+  <meta name="description" content="Pricing control test">
   <meta name="author" content="Sinan Gabel">
   <!-- <meta name="robots" content="INDEX, NOFOLLOW"> -->
 
@@ -15,15 +15,16 @@
   <!-- Designating 'IE=edge' is the best practice because it ensures Internet Explorer uses the latest engine. -->
   <meta http-equiv="X-UA-Compatible" content="IE=Edge">
 
-  <!-- Javascript enabled/not enabled -->
 
-    <title>RiskButler.com&trade; examples</title>
+    <title>Pricing control tests</title>
 
     <!-- PRODUCTION: REMOVE FROM HERE -->
-    <link rel="stylesheet" type="text/css" href="css/pure-min.css">
-    <link rel="stylesheet" type="text/css" href="css/pure-grids-responsive-min.css">
+    <link rel="stylesheet" type="text/css" href="css/ext/pure-min.css">
+    <link rel="stylesheet" type="text/css" href="css/ext/pure-grids-responsive-min.css">
+    <link rel="stylesheet" type="text/css" href="css/ext/metricsgraphics.css">
+
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="css/metricsgraphics.css">
+
     <link rel="stylesheet" type="text/css" href="css/rb.css">
     <!-- PRODUCTION: REMOVE TO HERE -->
 
@@ -33,7 +34,7 @@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/pure-min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/grids-responsive-min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/metrics-graphics/2.8.0/metricsgraphics.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/metrics-graphics/2.9.0/metricsgraphics.min.css">
     <link rel="stylesheet" type="text/css" href="css/rb.css">
 
 
@@ -52,19 +53,68 @@
 </head>
 <body>
 
+  <noscript><br><br><br><br><br><br><br>&nbsp;&nbsp;<strong>Your browser has JavaScript disabled. JavaScript must be enabled for RiskButler.com to function.</strong></noscript>
+
+
 <div class="content">
 
-  <h1>A Very Simple DPU</h1>
+  <h1>Pricing control tests</h1>
+  
+<form class="pure-form pure-form-stacked">
+    <fieldset>
 
-  <button class="pure-button" id="submitbutton">Calculate sim_ou</button>
+        <div class="pure-g">
+            <div class="pure-u-1 pure-u-sm-1-3 pure-u-md-1-3 pure-u-lg-1-5">
+                <label for="isin1">ISIN 1</label>
+                <select id="isin1">
+                </select>                
+            </div>
 
+            <div class="pure-u-1 pure-u-sm-1-3 pure-u-md-1-3 pure-u-lg-1-5">
+                <label for="isin2">ISIN 2</label>
+                <select id="isin2">
+                </select>                
+            </div>
+
+            <div class="pure-u-1 pure-u-sm-1-3 pure-u-md-1-3 pure-u-lg-1-5">
+                <label for="date-from">From</label>
+                <input id="date-from"  type="date">
+            </div>
+
+            <div class="pure-u-1 pure-u-sm-1-3 pure-u-md-1-3 pure-u-lg-1-5">
+                <label for="date-to">To</label>
+                <input id="date-to"  type="date">
+            </div>
+
+            <div class="pure-u-1 pure-u-sm-1-3 pure-u-md-1-3 pure-u-lg-1-5">
+                <label for="diagram">Diagram</label>
+                <select id="diagram">
+                    <option value="point">Point</option>
+                    <option value="line">Line</option>
+                </select>
+            </div>
+        </div>
+
+    </fieldset>
+</form>  
+
+<button class="pure-button button-two" id="but1" onclick="visualise();">Get data</button>
+<button class="pure-button button-three" id="but2" onclick="clearScreen();">Clear screen</button>
+
+  <hr>
 
   <div class="pure-g">
-    <div class="pure-u-1 pure-u-md-1-2" id="output"></div>
+    <div class="pure-u-1 pure-u-md-1-2" id="output1"></div>
     <div class="pure-u-1 pure-u-md-1-2" id="result"></div>
   </div>
 
+  <div id="diagram1"></div>
+  <div id="diagram2"></div>
 
+
+  <div id="table1"></div>
+  <div id="table2"></div>
+  
 
 </div>
 
@@ -78,56 +128,16 @@
 PRODUCTION: ENABLE TO HERE -->
 
 <!-- OpenCPU client library -->
-<script src="js/ext/jquery-2.2.0.min.js"></script>
+<script src="js/ext/jquery-2.2.3.min.js"></script>
 <script src="js/ext/opencpu-0.5.min.js"></script>
 <script src="js/ext/d3.min.js"></script>
 <script src="js/ext/metricsgraphics.min.js"></script>
 <script src="js/ext/underscore-min.js"></script>
+<script src="js/ext/math.min.js"></script>
 
-<script>
-//set CORS to call "stocks" package on public server
-ocpu.seturl("https://riskbutler.net/ocpu/github/sinangabel/radar/R")
-
-//call R function: stats::sd(x=data)
-$("#submitbutton").click(function() {
+<script src="js/rd.js"></script>
 
 
-  var req = ocpu.rpc("simou", {
-    "a": 3,
-    "b": 1,
-    "c": 2,
-    "n": 1000
-  }, function(output) {
-
-  var tt=Date.now(), dat=_.map(output, function(d) {return {"value": d, "date": new Date(tt++) }; });
-
-  $("#output").text(JSON.stringify(output));
-
-  console.log(dat);
-
-  MG.data_graphic({
-  title: "Test",
-  description: "Test",
-  data: dat,
-  width: 480,
-  height: 300,
-  target: document.getElementById("result"),
-  x_accessor: "date",
-  y_accessor: "value"
-  });
-
-  });
-
-  //optional
-  req.fail(function() {
-    alert("R returned an error: " + JSON.stringify(req.responseText));
-  });
-
-
-});
-
-
-</script>
 
 </body>
 </html>
