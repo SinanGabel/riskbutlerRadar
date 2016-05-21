@@ -14,7 +14,25 @@ ocpu.seturl("https://riskbutler.net/ocpu/github/sinangabel/radar/R");
 // --- global vars ---
 
 
+/*
+   --- About time ---
+ 
+ . A date e.g. "2016-05-12" without a Z is interpreted as local time in ES6
+ . The dates from NASDAQ are in local time
+ 
+ . data: [obj, obj, ...]
+ 
+ . Firefox returns: 2016-02-17T15:06:32.000Z which is a UTC time
+ . Safari and Chrome returns: Wed Feb 17 2016 16:06:32 GMT+0100 (CET) 
+ 
+*/
+function convertDateTime(data, key) {
 
+    data.forEach(function(v) {
+	    v[key] = new Date((v[key]).replace(/-/g, "/"));
+		return v; 
+	});
+}
 
 /*
 
@@ -295,7 +313,9 @@ function tekst(id, e, t) {
 
 function mgDiagram(id, type, data, isin) {
 
-  MG.data_graphic({
+    if (data.length < 3) {return;}
+
+ var json = {
   title: "Diagram: " + isin,
   description: "Price development",
   data: data,
@@ -310,8 +330,40 @@ function mgDiagram(id, type, data, isin) {
   x_accessor: "Time",
   y_accessor: ["Price"]
   //linked: true
-  });
+  };
+  
+  // ...
+  if (type === "point" && data.length > 20 ) {
+      json.least_squares = true;
+  }
+  
+  // ...
+  MG.data_graphic(json);  
 
+}
+
+// ...
+function mgHistogram(id, data, isin) {
+
+    if (data.length < 5) {return;}
+
+	MG.data_graphic({
+		title: "Histogram: " + isin,
+		description: "Histogram",
+		data: data,
+		chart_type: "histogram",
+		width: 480,
+		height: 300,
+		//right: 10,
+		bins: 50,
+		bar_margin: 0,
+		target: "#" + id,
+		y_extended_ticks: true,
+		mouseover: function(d, i) {
+			d3.select("#" + id + " svg .mg-active-datapoint")
+				.text("Value: " + d3.round(d.x,2) +  "   Count: " + d.y);
+		}
+	});
 }
 
 // ...
@@ -338,11 +390,20 @@ function tableStats(id, data) {
 // ...
 function stats(ar) {
 
-    var min = math.min(ar),
-        max = math.max(ar);
+    var min=0, max=0;
 
-    return {length: ar.length, mean: math.mean(ar), min: min, max: max, range: max - min, vol: math.std(ar) };
+	if (_.isEmpty(ar)) {
+	
+		//return {length: 0, mean: null, min: null, max: null, range: null, vol: null };
+	    return {};
+	
+	} else {
 
+		min = math.min(ar),
+		max = math.max(ar);
+
+		return {length: ar.length, mean: math.mean(ar), min: min, max: max, range: max - min, vol: math.std(ar) };
+    }
 }
 
 
@@ -365,16 +426,91 @@ function initialise() {
 initialise();
 
 
-// ...
+// ToDo: possibly get all id's and clear screen
 function clearScreen() {
 
-    document.getElementById("diagram1").textContent = "";
-    document.getElementById("diagram2").textContent = "";
-    document.getElementById("table1").textContent = "";
-    document.getElementById("table2").textContent = "";
+    var list = [ "warning", "diagram11", "diagram21", "diagram12", "diagram22", "histogram1", "histogram2", "table1", "table2"];
 
+    list.forEach(function(d) {return document.getElementById(d).textContent = "";});
 }
 
+
+// d: data
+function showResults(d, isin1, isin2) {
+
+      // --- filter for buyer/seller ---
+      var traders = _.union(_.pluck(d, "buyer").concat(_.pluck(d, "seller")));
+      
+      var ar = _.map(["All"].concat(traders), function(d) {return "<option>" + d + "</option>"; });
+      document.getElementById("buyers").innerHTML = ar.join();
+      document.getElementById("sellers").innerHTML = ar.join();
+      
+      var buyer_id = document.getElementById("buyers").value;
+      var seller_id = document.getElementById("sellers").value;
+      
+      if (buyer_id !== "All" || seller_id !== "All") {
+      
+          if (buyer_id !== "All") {
+              d = _.filter(d, function(d) {return d.buyer === buyer_id; });
+          }        
+
+          if (seller_id !== "All") {
+              d = _.filter(d, function(d) {return d.seller === seller_id; });
+          }        
+      }
+      
+    
+	  // --- group raw data by ISIN ---
+	  var data = _.groupBy(d, "ISIN");
+	  data = [_.extend(stats(_.pluck(data[isin1], "Price")), {title: isin1}), _.extend(stats(_.pluck(data[isin2], "Price")), {title: isin2})]; 
+
+
+
+	  // --- generate tables ---
+	  tableStats("table1", data);
+	
+
+		MG.data_table({
+			title: "A table",
+			description: "A table",
+			data: d
+			//show_tooltips: true
+		})
+		.target("#table2")
+		.title({accessor: "ISIN", label: "ISIN", color: "gray"})
+		.number({ accessor: 'Price', label: 'Price', color: "blue"})
+		.number({ accessor: 'Time', label: 'Time'})
+		.text({ accessor: 'Name', label: 'Name'})
+		.number({ accessor: 'Volume', label: 'Volume'})
+		.text({ accessor: 'buyer', label: 'Buyer', color: function(d) {return d === "RD" ? "blue" : "auto"; }})
+		.text({ accessor: 'seller', label: 'Seller', color: function(d) {return d === "RD" ? "blue" : "auto"; }})
+		.display();  
+	
+	
+		// --- generate diagrams ---
+	
+	    convertDateTime(d, "Time");
+	    
+		data = _.groupBy(d, "ISIN");
+	
+		//var diag = document.getElementById("diagram").value;
+		
+		if (! _.isEmpty(data[isin1])) {
+			mgDiagram("diagram11", "line", data[isin1], isin1);
+
+			mgDiagram("diagram12", "point", data[isin1], isin1);
+	
+			mgHistogram("histogram1", _.pluck(data[isin1], "Price"), isin1);
+		}
+
+		if (! _.isEmpty(data[isin2])) {
+			mgDiagram("diagram21", "line", data[isin2], isin2);
+
+			mgDiagram("diagram22", "point", data[isin2], isin2);
+	
+			mgHistogram("histogram2", _.pluck(data[isin2], "Price"), isin2);		
+		}
+}
 
 
 //call R function: stats::sd(x=data)
@@ -387,15 +523,10 @@ function visualise() {
       stmt = "",
       d1 = 0, d2 = 0;
       
-  // ...
+  // Make select statements
   if (from === "" && to === "") {
       stmt = "SELECT * FROM rd WHERE ISIN IN ('" + isin1 + "', '" + isin2 + "') order by Time ASC, ISIN ASC";
   
-
-//  } else if (from === to) {
-//      stmt = "SELECT * FROM rd WHERE ISIN IN ('" + isin1 + "', '" + isin2 + "') AND Time between '" + from + "' AND date('" + to + "', '+1 days') order by Time ASC, ISIN ASC";
-//
-//  } else if (from !== "" || to !== "") {
   } else {
   
   
@@ -403,11 +534,11 @@ function visualise() {
       to = (to === "") ? "2050-01-01" : to;
       
       // check figures
+      // These are just to compare times so there is no issue of local time or UTC time
       d1 = (new Date(from)).getTime();
       d2 = (new Date(to)).getTime();
       if (d1 > d2) {
-          clearScreen();
-          document.getElementById("diagram1").textContent = "Date selection error: Please select a From date that is before the To date!";
+          tekst("warning", "p", "Date selection error: Please select a From date that is before the To date!");
           return;
       }
   
@@ -415,62 +546,30 @@ function visualise() {
       stmt = "SELECT * FROM rd WHERE ISIN IN ('" + isin1 + "', '" + isin2 + "') AND Time between '" + from + "' AND date('" + to + "', '+1 days') order by Time ASC, ISIN ASC";
   }    
 
+  // Get new data
   sqliteSQL({"url": "/home/ubuntu/sql/rd1.db", "stmt": stmt}, function(d) {
   
+  // ...
+  if (_.isEmpty(d)) {
+      tekst("warning", "p", "No data available for given selections!");
+      return;
   
-  // --- extend with seller and buyer ---
-  var i = 0, data = []; 
-
-  d.forEach(function(v) {
-      i++; 
-      v.seller = (i % 2 === 0) ? "RD" : "NYK"; 
-      v.buyer = (v.seller === "RD") ? "NYK" : "RD";
-      return v; });
+  } else {
   
-  console.log(d);
+	  // --- Preliminary solution: extend with seller and buyer ---
+	  d.forEach(function(v) {
+		  var other = _.sample(["Nykredit", "BRF", "DLR", "Totalkredit"]);
+		   
+		  v.seller = (Math.random() < 0.5) ? "RD" : other;  // RD 30 % of the samples
+		  v.buyer = (v.seller === "RD") ? other : "RD";
+		  return v; });
   
+	  console.log(d);
+	  
+	  showResults(d, isin1, isin2);
 
-  // --- generate tables ---
-  data = _.groupBy(d, "ISIN");
-  data = [_.extend(stats(_.pluck(data[isin1], "Price")), {title: isin1}), _.extend(stats(_.pluck(data[isin2], "Price")), {title: isin2})]; 
-
-  tableStats("table1", data);
-    
-
-    MG.data_table({
-        title: "A table",
-        description: "A table",
-        data: d
-        //show_tooltips: true
-    })
-    .target("#table2")
-    .title({accessor: "ISIN", label: "ISIN", color: "gray"})
-    .number({ accessor: 'Price', label: 'Price', color: "blue"})
-    .number({ accessor: 'Time', label: 'Time'})
-    .text({ accessor: 'Name', label: 'Name'})
-    .number({ accessor: 'Volume', label: 'Volume'})
-    .text({ accessor: 'buyer', label: 'Buyer', color: function(d) {return d === "RD" ? "blue" : "auto"; }})
-    .text({ accessor: 'seller', label: 'Seller', color: function(d) {return d === "RD" ? "blue" : "auto"; }})
-    .display();  
-    
-    
-    // --- generate diagrams ---
-    
-    d.forEach(function(v) {
-          v.Time = new Date(v.Time);
-          return v; 
-    });
-    
-    data = _.groupBy(d, "ISIN");
-    
-    var diag = document.getElementById("diagram").value;
-    
-    mgDiagram("diagram1", diag, data[isin1], isin1);
-    mgDiagram("diagram2", diag, data[isin2], isin2);
-
-
-
-    });    
+    }
+  }); 
 };
 
 
