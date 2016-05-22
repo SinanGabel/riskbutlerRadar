@@ -11,7 +11,7 @@ html, button, input, select, textarea, .pure-g [class*="pure-u"] {
 body {
     line-height : 1.5em;
     color : rgb(68, 68, 68);
-    font-size : 14px;
+    font-size : 13px;
 }
 
 h1, h2 {
@@ -371,7 +371,7 @@ line-height : 1em;
 
 	body {
 	    line-height : 1em;
-	    font-size : 12px;
+	    font-size : 10px;
 	}
 
 	.splash {

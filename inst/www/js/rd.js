@@ -316,7 +316,7 @@ function mgDiagram(id, type, data, isin) {
     if (data.length < 3) {return;}
 
  var json = {
-  title: "Diagram: " + isin,
+  title: "Price: " + isin,
   description: "Price development",
   data: data,
   chart_type: type,
@@ -334,7 +334,18 @@ function mgDiagram(id, type, data, isin) {
   
   // ...
   if (type === "point" && data.length > 20 ) {
+
       json.least_squares = true;
+  }
+
+  if (type === "point-size") {
+  
+      json.title = "Price (point) & Volume (size): " + isin;
+      json.chart_type = "point";
+      json.description = "Price & Volume development";
+      json.color_accessor = "Volume";
+      json.size_accessor = "Volume";
+      json.size_range = [1,40];      
   }
   
   // ...
@@ -343,13 +354,15 @@ function mgDiagram(id, type, data, isin) {
 }
 
 // ...
-function mgHistogram(id, data, isin) {
+function mgHistogram(id, data, isin, accessor) {
+
+    data = _.pluck(data[isin], accessor);
 
     if (data.length < 5) {return;}
 
 	MG.data_graphic({
-		title: "Histogram: " + isin,
-		description: "Histogram",
+		title: accessor + ": " + isin,
+		description: accessor + " histogram",
 		data: data,
 		chart_type: "histogram",
 		width: 480,
@@ -361,7 +374,7 @@ function mgHistogram(id, data, isin) {
 		y_extended_ticks: true,
 		mouseover: function(d, i) {
 			d3.select("#" + id + " svg .mg-active-datapoint")
-				.text("Value: " + d3.round(d.x,2) +  "   Count: " + d.y);
+			  .text(accessor + ": " + d3.round(d.x,2) +  "   Count: " + d.y);
 		}
 	});
 }
@@ -378,8 +391,10 @@ function tableStats(id, data) {
     .target("#" +  id)
     .title({ accessor: "title", label: "ISIN"})
     .number({ accessor: "length", label: "Total", color: "gray"})
+    //.text({ accessor: "mode", label: "Mode", color: "blue"})
     .number({ accessor: "min", label: "Min", round: 2})
     .number({ accessor: "mean", label: "Mean", color: "blue", round: 2})
+    .number({ accessor: "median", label: "Median", color: "blue", round: 2})
     .number({ accessor: "max", label: "Max", color: "gray", round: 2})
     .number({ accessor: "range", label: "Range", round: 2})
     .number({ accessor: "vol", label: "Volatility", round: 2})
@@ -390,7 +405,7 @@ function tableStats(id, data) {
 // ...
 function stats(ar) {
 
-    var min=0, max=0;
+    var min=0, max=0, mode = [];
 
 	if (_.isEmpty(ar)) {
 	
@@ -399,10 +414,13 @@ function stats(ar) {
 	
 	} else {
 
-		min = math.min(ar),
+		min = math.min(ar);
 		max = math.max(ar);
+		mode = math.mode(ar);
+		
+		//mode = (mode.length > 1) ? JSON.stringify(mode) : ("" + mode[0] + "") ;
 
-		return {length: ar.length, mean: math.mean(ar), min: min, max: max, range: max - min, vol: math.std(ar) };
+		return {length: ar.length, mean: math.mean(ar), median: math.median(ar), min: min, max: max, range: max - min, vol: math.std(ar) };
     }
 }
 
@@ -429,7 +447,7 @@ initialise();
 // ToDo: possibly get all id's and clear screen
 function clearScreen() {
 
-    var list = [ "warning", "diagram11", "diagram21", "diagram12", "diagram22", "histogram1", "histogram2", "table1", "table2"];
+    var list = [ "warning", "diagram11", "diagram21", "diagram12", "diagram22", "diagram13", "diagram23", "histogram11", "histogram21", "histogram12", "histogram22", "table1", "table2"];
 
     list.forEach(function(d) {return document.getElementById(d).textContent = "";});
 }
@@ -460,16 +478,15 @@ function showResults(d, isin1, isin2) {
       }
       
     
-	  // --- group raw data by ISIN ---
+	  // --- group raw data by ISIN for tables ---
 	  var data = _.groupBy(d, "ISIN");
-	  data = [_.extend(stats(_.pluck(data[isin1], "Price")), {title: isin1}), _.extend(stats(_.pluck(data[isin2], "Price")), {title: isin2})]; 
+	  
+	  data = _.map(_.keys(data), function(d) {return _.extend(stats(_.pluck(data[d], "Price")), {title: d}); });
+	  
+	  //data = [_.extend(stats(_.pluck(data[isin1], "Price")), {title: isin1}), _.extend(stats(_.pluck(data[isin2], "Price")), {title: isin2})]; 
 
-
-
-	  // --- generate tables ---
 	  tableStats("table1", data);
 	
-
 		MG.data_table({
 			title: "A table",
 			description: "A table",
@@ -492,6 +509,8 @@ function showResults(d, isin1, isin2) {
 	    convertDateTime(d, "Time");
 	    
 		data = _.groupBy(d, "ISIN");
+		
+		console.log(data);
 	
 		//var diag = document.getElementById("diagram").value;
 		
@@ -500,15 +519,23 @@ function showResults(d, isin1, isin2) {
 
 			mgDiagram("diagram12", "point", data[isin1], isin1);
 	
-			mgHistogram("histogram1", _.pluck(data[isin1], "Price"), isin1);
+			mgDiagram("diagram13", "point-size", data[isin1], isin1);
+
+			mgHistogram("histogram11", data, isin1, "Price");
+
+			mgHistogram("histogram12", data, isin1, "Volume");
 		}
 
-		if (! _.isEmpty(data[isin2])) {
+		if (! _.isEmpty(data[isin2]) && isin1 !== isin2) {
 			mgDiagram("diagram21", "line", data[isin2], isin2);
 
 			mgDiagram("diagram22", "point", data[isin2], isin2);
 	
-			mgHistogram("histogram2", _.pluck(data[isin2], "Price"), isin2);		
+			mgDiagram("diagram23", "point-size", data[isin2], isin2);
+
+			mgHistogram("histogram21", data, isin2, "Price");		
+
+			mgHistogram("histogram22", data, isin2, "Volume");
 		}
 }
 
@@ -522,13 +549,16 @@ function visualise() {
       to = document.getElementById("date-to").value, 
       stmt = "",
       d1 = 0, d2 = 0;
+  
+  // ...
+  stmt = (isin1 === isin2) ? ("ISIN = '" + isin1 + "'") : ("ISIN IN ('" + isin1 + "', '" + isin2 + "')") ;
       
   // Make select statements
   if (from === "" && to === "") {
-      stmt = "SELECT * FROM rd WHERE ISIN IN ('" + isin1 + "', '" + isin2 + "') order by Time ASC, ISIN ASC";
+      
+      stmt = "SELECT * FROM rd WHERE " + stmt + " order by Time ASC, ISIN ASC";
   
   } else {
-  
   
       from = (from === "") ? "1970-01-01" : from;
       to = (to === "") ? "2050-01-01" : to;
@@ -543,7 +573,7 @@ function visualise() {
       }
   
       // continue
-      stmt = "SELECT * FROM rd WHERE ISIN IN ('" + isin1 + "', '" + isin2 + "') AND Time between '" + from + "' AND date('" + to + "', '+1 days') order by Time ASC, ISIN ASC";
+      stmt = "SELECT * FROM rd WHERE " + stmt + " AND Time between '" + from + "' AND date('" + to + "', '+1 days') order by Time ASC, ISIN ASC";
   }    
 
   // Get new data
