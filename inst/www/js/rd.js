@@ -294,6 +294,34 @@ function d3FormatJsonFilter(json) {
 }
 
 
+// --- statistics.js ---
+
+function deviation(m, ts, lag) { 
+  
+  lag = lag || 1;
+ 
+  if (m === 1) {
+    return _.map(ts, function(d) {return numeric.mul(numeric.sub(numeric.div(_.rest(d, lag), _.initial(d, lag)), 1), 100);})
+  } else if (m === 2) {
+    return _.map(ts, function(d) {return numeric.sub(numeric.div(_.rest(d, lag), _.initial(d, lag)), 1);})
+  } else if (m === 3) {
+      return _.map(ts, function(d) {return numeric.mul(numeric.log(numeric.div(_.rest(d, lag), _.initial(d, lag))), 100);})
+  } else if (m === 4) {
+      return _.map(ts, function(d) {return numeric.log(numeric.div(_.rest(d, lag), _.initial(d, lag)));})
+  }
+
+}
+
+
+function rangeC(c, n) {
+  var r = [], i = 0;
+  for(i = 0; i < n; i++) {
+    r.push(c);
+  }
+  return r;
+}
+
+
 // --- ui.js ---
 
 /*
@@ -456,6 +484,13 @@ function clearScreen() {
 // d: data
 function showResults(d, isin1, isin2) {
 
+      var group = {}, data = [];
+      
+      // -- update from and to dates in UX
+      document.getElementById("date-from").value = (d[0].Time).substr(0,10);
+      document.getElementById("date-to").value = (d[d.length - 1].Time).substr(0,10);
+      
+
       // --- filter for buyer/seller ---
       var traders = _.union(_.pluck(d, "buyer").concat(_.pluck(d, "seller")));
       
@@ -479,12 +514,11 @@ function showResults(d, isin1, isin2) {
       
     
 	  // --- group raw data by ISIN for tables ---
-	  var data = _.groupBy(d, "ISIN");
+	  group = _.groupBy(d, "ISIN");
 	  
-	  data = _.map(_.keys(data), function(d) {return _.extend(stats(_.pluck(data[d], "Price")), {title: d}); });
+      // ...	  
+	  data = _.map(_.keys(group), function(d) {return _.extend(stats(_.pluck(group[d], "Price")), {title: d}); });
 	  
-	  //data = [_.extend(stats(_.pluck(data[isin1], "Price")), {title: isin1}), _.extend(stats(_.pluck(data[isin2], "Price")), {title: isin2})]; 
-
 	  tableStats("table1", data);
 	
 		MG.data_table({
@@ -494,7 +528,9 @@ function showResults(d, isin1, isin2) {
 			//show_tooltips: true
 		})
 		.target("#table2")
+		.number({accessor: "counter", label: "Row"})
 		.title({accessor: "ISIN", label: "ISIN", color: "gray"})
+		//.number({ accessor: 'Price_old', label: 'Last'})
 		.number({ accessor: 'Price', label: 'Price', color: "blue"})
 		.number({ accessor: 'Time', label: 'Time'})
 		.text({ accessor: 'Name', label: 'Name'})
@@ -508,34 +544,34 @@ function showResults(d, isin1, isin2) {
 	
 	    convertDateTime(d, "Time");
 	    
-		data = _.groupBy(d, "ISIN");
+		group = _.groupBy(d, "ISIN");
 		
-		console.log(data);
+		console.log(group);
 	
 		//var diag = document.getElementById("diagram").value;
 		
-		if (! _.isEmpty(data[isin1])) {
-			mgDiagram("diagram11", "line", data[isin1], isin1);
+		if (! _.isEmpty(group[isin1])) {
+			mgDiagram("diagram11", "line", group[isin1], isin1);
 
-			mgDiagram("diagram12", "point", data[isin1], isin1);
+			mgDiagram("diagram12", "point", group[isin1], isin1);
 	
-			mgDiagram("diagram13", "point-size", data[isin1], isin1);
+			mgDiagram("diagram13", "point-size", group[isin1], isin1);
 
-			mgHistogram("histogram11", data, isin1, "Price");
+			mgHistogram("histogram11", group, isin1, "Price");
 
-			mgHistogram("histogram12", data, isin1, "Volume");
+			mgHistogram("histogram12", group, isin1, "Volume");
 		}
 
-		if (! _.isEmpty(data[isin2]) && isin1 !== isin2) {
-			mgDiagram("diagram21", "line", data[isin2], isin2);
+		if (! _.isEmpty(group[isin2]) && isin1 !== isin2) {
+			mgDiagram("diagram21", "line", group[isin2], isin2);
 
-			mgDiagram("diagram22", "point", data[isin2], isin2);
+			mgDiagram("diagram22", "point", group[isin2], isin2);
 	
-			mgDiagram("diagram23", "point-size", data[isin2], isin2);
+			mgDiagram("diagram23", "point-size", group[isin2], isin2);
 
-			mgHistogram("histogram21", data, isin2, "Price");		
+			mgHistogram("histogram21", group, isin2, "Price");		
 
-			mgHistogram("histogram22", data, isin2, "Volume");
+			mgHistogram("histogram22", group, isin2, "Volume");
 		}
 }
 
@@ -547,8 +583,9 @@ function visualise() {
       isin2 = document.getElementById("isin2").value,
       from = document.getElementById("date-from").value,
       to = document.getElementById("date-to").value, 
-      stmt = "",
-      d1 = 0, d2 = 0;
+      
+      stmt = "", 
+      i = 1, d1 = 0, d2 = 0;
   
   // ...
   stmt = (isin1 === isin2) ? ("ISIN = '" + isin1 + "'") : ("ISIN IN ('" + isin1 + "', '" + isin2 + "')") ;
@@ -588,13 +625,22 @@ function visualise() {
   
 	  // --- Preliminary solution: extend with seller and buyer ---
 	  d.forEach(function(v) {
+		  
+		  // ToDo: now it is a random sample of counterparties
 		  var other = _.sample(["Nykredit", "BRF", "DLR", "Totalkredit"]);
 		   
 		  v.seller = (Math.random() < 0.5) ? "RD" : other;  // RD 30 % of the samples
 		  v.buyer = (v.seller === "RD") ? other : "RD";
-		  return v; });
-  
-	  console.log(d);
+	  
+	      // counter
+	      v.counter = i++;
+	      
+	      // return
+	      return v;
+	  
+	  });
+	  
+	  console.log("all data: ", d);
 	  
 	  showResults(d, isin1, isin2);
 
