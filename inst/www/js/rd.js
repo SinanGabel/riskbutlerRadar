@@ -1,18 +1,6 @@
 "use strict";
 
 
-// --- r-code.js ---
-
-/*
-  . warning: https is necessary here
-
-  . warning: on local machine e.g. Mac set in .htaccess file => Header set Access-Control-Allow-Origin "*"
-
-*/
-ocpu.seturl("https://riskbutler.net/ocpu/github/sinangabel/radar/R");
-
-// --- global vars ---
-
 
 /*
    --- About time ---
@@ -34,308 +22,59 @@ function convertDateTime(data, key) {
 	});
 }
 
-/*
 
- . Test ok: sqliteSQL({"url": "/home/ubuntu/sql/ecb.db", "stmt": 'SELECT * FROM stdin where "code" = "USD"'}, function(d) {return console.log(d); })          
-            
- . with ecb.db use e.g.:  _.map(output, function(v,k) {return {"value": v.CLOSE, "date": new Date(v.DATE) }; }) 
- 
- . sqliteSQL({"url": "/home/ubuntu/sql/fxf.db", "stmt": "SELECT DISTINCT CODE FROM stdin LIMIT 1000" }, function(d) {return console.log(d); })
+// ToDo: check UTC
+function someWeekDays(from, n) {
 
- . curl 'https://riskbutler.net/ocpu/github/sinangabel/radar/R/sqlite.sql/json' -H "Content-Type: application/json" -d '{"url": "/home/ubuntu/sql/fxf.db", "stmt": "SELECT DISTINCT CODE FROM stdin LIMIT 1000" }'
-
- . data = _.map(data, function(d) {var dt = (d.DATE).toString(); return {"value": d.CLOSE, "date": new Date(Date.UTC(dt.substr(0,4), dt.substr(4,2), dt.substr(2,2), d.TIME.substr(0,2), d.TIME.substr(2,2), d.TIME.substr(4,2))) }; });
-          
- . stmt: e.g. 'select * from stdin where CODE="USD" and DATE between "2013-01-01" and "2016-04-01" order by DATE ASC'
-
-*/
-function sqliteSQL(params, callback) {
-
-    // filter required parameters
-    var required_keys = ["url", "stmt"];  
-  
-    params = _.pick(params, required_keys);
-  
-    if (! _.isEqual(_.union(_.keys(params), required_keys), required_keys)) {
-        console.log("missing parameters");
-        return;
-    }
+    from = from || _.now();
+    n = n || 5;
     
-    // callback check 
-    if (_.isFunction(callback) === false) {
-        console.log("callback not a function");
-        return;
-    } 
-    
-    // continue
-    var req = ocpu.rpc("sqlite.sql", params, function(res) {
-  
-        callback(res);
-    });
-  
-    req.fail(function() {
-        console.log("R returned an error: ", req.responseText);
-    });
-
-    req.always(function() {
-		console.log("R called!");  
-	});
+    // add two for weekend effect
+    return _.map(_.last(weekdays(from - 86400000 * (n + 2), from), n), function(d) {var dd = new Date(d); return daysofweek[dd.getDay()] + " " + dd.toJSON().substr(0,10); });
 }
 
 
-// --- filter.js ---
-
-/*
-  . id: DOM id
-  . m: matrix
-  . ToDo: possibility to format numbers
-  .    . add thead
-       . add class as parameter
-*/
-function makeTable(id, m, cls) {
-
-    cls = cls || "pure-table pure-table-striped";
-
-	var table = document.createElement("table"),
-	    tb = document.createElement("tbody"),
-		tr, td, trs,
-		i=0, j=0,
-		l=m.length, ll=0;
-
-	for (i = 0; i < l; i++) {
-		tr = document.createElement("tr");
-		trs = ([i]).concat(m[i]);  // i is a row counter
-		ll = trs.length;
-		
-		for (j = 0; j < ll; j++) {
-		   td = document.createElement("td");
-		   td.textContent = trs[j];
-		   tr.appendChild(td);
-		}
-		tb.appendChild(tr);
-	}
-	table.appendChild(tb);
-	
-	// if l>2500 td: padding 6px
-	if (l < 2500) {table.setAttribute("class", cls); }
-	document.getElementById(id).appendChild(table);
+// ...
+function setToFrom(day) {
+  
+  if (_.isEmpty(day)) {return; }
+  
+  document.getElementById("date-from").value = day;
+  document.getElementById("date-to").value = day;
 }
 
-/*
-  . t: html DOM table
-  
-  . note: it is assumed that firstChild of t is <tbody> as in makeTable()
-  
-  . example: "pf-display" => t = document.getElementById("pf-display").firstChild
-*/
-function tableToArray(t) {
-  
-  function fun(r) {
-      return _.map(r.children, function(d) {return d.textContent; });
-  }
-  
-  return _.map(t.firstChild.childNodes, function(d) {return fun(d); });
-}
+// ...
+function getToFrom() {
 
-
-/*
- . ar: matrix
- 
- . example: arrayToCsv(tableToArray(document.getElementById("pf-display").firstChild)) => .csv text
-*/
-function arrayToCsv(ar) {
-    return _.reduce(_.map(ar, function(d) {return d.join();}), function(a, b) {return a + "\n" + b; }, "");
-}
-
-
-/*
- . warning for multiseries(): the first label should be "t" and the first time series of matrix should be time in milliseconds
- . Warning: time1, time2 etc. must be identical => see tip below
-
- . obj as matrix: [[label1, label2, ...], [times1, times2, ...], [timeseries1, timeseries2]]
- . matrixToJson([["t","a","b"], [1384905600000, 1384992000000, 1385078400000],[3,4,5],[30,40,50] ])
- 
- . obj as timeseriesA: {"label1": [[time1, time2, ...], [timeseries1]], ...}
- 
- . return format: 
-      [{
-		"t": 1409320800000,
-		"pct05": 5350,
-		"pct25": 6756,
-		"pct50": 7819,
-		"pct75": 9284,
-		"pct95": 13835
-	   }, ...]
- 
- . Tip: 
-   .  matrixToJson(filterData(1, timeseriesA,"day",1426809600000)); from = new Date("2015-03-20Z").getTime() = 1426809600000
-   
-   .  historical market prices: 
-        _.map(calc_tmp["i"], function(d) {return matrixToJson([["t", d.symbol], d.hist_times, d.hist]); })
-        _.map(calc_tmp["i"], function(d) {return matrixToJson([["t", d.symbol], _.map(d.hist_times, function(f) {return new Date(f);}), d.hist]); })
-  
- . ToDo: possibly exclude some data points	   
-
-*/
-function matrixToJson(obj) {
-
-    if (_.isEmpty(obj)) {return; }  // no data
-    
-    var lb = [], t = [], v = [];
-    
-    // assumed matrix i.e. array of arrays
-    if (_.isArray(obj)) {
-    
-        lb = obj[0];  // keys (labels)    
-        return _.map(numeric.transpose(_.rest(obj)), function(d) {return _.object(lb, d); })
-    
-    // assumed object = timeseriesA, possibly after filterData()
-    } else {
-    
-        // keys (labels)
-        lb = _.keys(obj);
-        
-        // time
-        t = obj[lb[0]][0];  // array of time
-        
-        // check for time format day or ms since 1970
-        if ((t[0]).toString().length < 13) {t = numeric.mul(t, 86400000); }
-        
-        // continue
-        lb = ["t"].concat(lb);   
-        
-        // values
-        v = _.map(obj, function(v) {return v[1]; });  // values (without time)
-        v = [t].concat(v);
-        
-        return _.map(numeric.transpose(v), function(d) {return _.object(lb, d); })
-    }
-}
-
-
-/**
-
- . Used to import FX data a.o. from own couchdb databases
-
- . json: format: 
-      [{
-		"t": 1409320800000,
-		"pct05": 5350,
-		"pct25": 6756,
-		"pct50": 7819,
-		"pct75": 9284,
-		"pct95": 13835
-	   }, ...]
-	     
-  . return format: 
-        {key: [time, values], key: [time, values]}
+  var from = document.getElementById("date-from").value,
+      to = document.getElementById("date-to").value, 
       
-  . Warning: json[0] may not contain all keys, it could be one of the other objects
-*/
-function jsonToMatrix(json) {
-
-    if (_.isEmpty(json)) {return; }
-    
-    json = _.sortBy(json, "t");
-
-    var k = _.without(_.keys(json[0]),"t"),
-        i = 0,
-        obj = {},
+      d1 = 0, d2 = 0;
         
-        t = _.map(json, function(d) {return d.t; });
-            
-    for (i = 0; i < k.length; i++) {
-    
-        obj[k[i]] = numeric.transpose(_.map(json, function(d) {return [d.t, d[k[i]]]; }));    
-    }
-    
-    return obj;
-}
-
-
-/*
-
- . json: format: 
-      [{
-		"t": 1409320800000,
-		"pct05": 5350,
-		"pct25": 6756,
-		"pct50": 7819,
-		"pct75": 9284,
-		"pct95": 13835
-	   }, ...]
-	   
-	   
-  . return format: 
-      [{key: pct05, values: [{},{} ...]}, {key: pct25, values: [{},{} ...]}, ...]
+  // Make select statements
+  if (from === "" && to === "") {
       
-      
-  . Used for small multiples diagram, for example    	   
-
-
-*/
-function d3FormatJsonFilter(json) {
-
-    if (_.isEmpty(json)) {return; }
-
-    var k = _.without(_.keys(json[0]),"t"),
-        i = 0,
-        ar = [],
-        
-        t_min = d3.min(json, function(d) {return d.t; }),
-        t_max = d3.max(json, function(d) {return d.t; });
-            
-    for (i = 0; i < k.length; i++) {
-    
-        ar.push({"key": k[i], "t_min": t_min, "t_max": t_max, "v": _.map(json, function(d) {return {"ki": k[i], "p": d[k[i]], "t": d.t }}) });    
-    }
-    
-    return ar;
-}
-
-
-// --- statistics.js ---
-
-function deviation(m, ts, lag) { 
+      tekst("warning", "p", "Please make a date selection!");
+      return [];
   
-  lag = lag || 1;
- 
-  if (m === 1) {
-    return _.map(ts, function(d) {return numeric.mul(numeric.sub(numeric.div(_.rest(d, lag), _.initial(d, lag)), 1), 100);})
-  } else if (m === 2) {
-    return _.map(ts, function(d) {return numeric.sub(numeric.div(_.rest(d, lag), _.initial(d, lag)), 1);})
-  } else if (m === 3) {
-      return _.map(ts, function(d) {return numeric.mul(numeric.log(numeric.div(_.rest(d, lag), _.initial(d, lag))), 100);})
-  } else if (m === 4) {
-      return _.map(ts, function(d) {return numeric.log(numeric.div(_.rest(d, lag), _.initial(d, lag)));})
-  }
-
+  } else {
+  
+      from = (from === "") ? "1970-01-01" : from;
+      to = (to === "") ? "2099-01-01" : to;
+      
+      // check figures
+      // These are just to compare times so there is no issue of local time or UTC time
+      d1 = (new Date(from)).getTime();
+      d2 = (new Date(to)).getTime();
+      if (d1 > d2) {
+          tekst("warning", "p", "Date selection error: Please select a From date that is before the To date!");
+          return [];
+      }
+  
+      return (d1 === d2) ? [from] : [from, to] ;
+  }    
 }
 
-
-function rangeC(c, n) {
-  var r = [], i = 0;
-  for(i = 0; i < n; i++) {
-    r.push(c);
-  }
-  return r;
-}
-
-
-// --- ui.js ---
-
-/*
- . tekst("big-diagram", "p", "this is some text ...")
- 
- . id: "big-diagram"
- . e : "p" for <p> element
- . t : "Some text for the element <p></p>"
-*/
-function tekst(id, e, t) {
-    var d = document.getElementById(id);
-    d.appendChild(document.createElement(e));
-    d.lastChild.textContent = t;
-}
 
 // --- other ---
 
@@ -413,22 +152,76 @@ function tableStats(id, data) {
     MG.data_table({
         title: "Statistics",
         description: "Table of numbers",
-        data: data
+        data: (_.sortBy(data, "range")).reverse()
         //show_tooltips: true
     })
     .target("#" +  id)
-    .title({ accessor: "title", label: "ISIN"})
-    .number({ accessor: "length", label: "Total", color: "gray"})
+    .text({ accessor: "name", label: "Name"})
+    .text({ accessor: "isin", label: "ISIN"})
+    .number({ accessor: "range", label: "Range", round: 2})
     //.text({ accessor: "mode", label: "Mode", color: "blue"})
     .number({ accessor: "min", label: "Min", round: 2})
-    .number({ accessor: "mean", label: "Mean", color: "blue", round: 2})
-    .number({ accessor: "median", label: "Median", color: "blue", round: 2})
+    .number({ accessor: "vwap", label: "Mean*", color: "blue", round: 2})
+    //.number({ accessor: "median", label: "Median", round: 2})
     .number({ accessor: "max", label: "Max", color: "gray", round: 2})
-    .number({ accessor: "range", label: "Range", round: 2})
     .number({ accessor: "vol", label: "Volatility", round: 2})
+    .number({ accessor: "length", label: "Count", color: "gray"})
     .display();
 
 }
+
+// ...
+function tableTransactions(id, data) {
+
+	  MG.data_table({
+			title: "A table",
+			description: "A table",
+			data: data
+			//show_tooltips: true
+		})
+        .target("#" +  id)
+		.number({accessor: "counter", label: "Row"})
+		.number({ accessor: 'Time', label: 'Time'})
+		.number({ accessor: 'Price', label: 'Price', color: "blue"})
+		.text({ accessor: 'Name', label: 'Name'})
+		.text({accessor: "ISIN", label: "ISIN", color: "gray"})
+		//.number({ accessor: 'Price_old', label: 'Last'})
+		.number({ accessor: 'Volume', label: 'Volume'})
+		.text({ accessor: 'buyer', label: 'Buyer', color: function(d) {return d === "RD" ? "red" : "auto"; }})
+		.text({ accessor: 'seller', label: 'Seller', color: function(d) {return d === "RD" ? "red" : "auto"; }})
+		.display();  
+
+}
+
+
+/*
+ . vwap(d, "Price", "Volume")
+
+ . https://en.wikipedia.org/wiki/Volume-weighted_average_price
+ 
+ . format d: [{},{},...]
+ 
+ . returns a number
+ 
+   vwap([{p: 100, v: 100}], "p", "v")  => 100
+   vwap([{p: 100, v: 1},{p: 1000, v: 2}], "p", "v")  => 700
+   
+ . warning: It is assumed that all volumes v > 0
+ 
+*/
+function vwap(d, p, v) {
+ 
+    if (_.isEmpty(d)) {return; } 
+ 
+    var q = [], ar = [];
+    
+    q = _.pluck(d, v);
+    
+    ar = _.map(d, function(d) {return d[p] * d[v];});
+
+    return math.sum(ar)/math.sum(q);
+}
+
 
 // ...
 function stats(ar) {
@@ -453,23 +246,73 @@ function stats(ar) {
 }
 
 
-// initialise
-// 'SELECT * FROM rd where Time BETWEEN "2016-02-15" AND "2016-03-15";'
-function initialise() {
+// ...
+function updateDateButtons(ar) {
 
-    var markup = "";
+    ar = ar || someWeekDays();
 
-    sqliteSQL({"url": "/home/ubuntu/sql/rd1.db", "stmt": 'SELECT distinct ISIN FROM rd order by ISIN ASC'}, function(d) {
-    
-        var ar = _.map(_.pluck(d, "ISIN"), function(d) {return "<option>" + d + "</option>"; });
-        document.getElementById("isin1").innerHTML = ar.join();
-        document.getElementById("isin2").innerHTML = ar.join();
-    
-    });
-
+    // date buttons
+    ar = _.map(ar, function(d) {return '<button class="pure-button" type="button" onclick="setToFrom(\'' + d.substr(-10) + '\');">' + d + '</button>'; });
+    document.getElementById("date-buttons").innerHTML = '<label>5 days</label>' + ar.join(" ");
 
 }
-initialise();
+
+/*
+ . Initial UX update
+*/
+function uxInit() {
+
+    setAction("System upstart!", false, 0.8);
+
+    var ar = [],
+        day = "",
+        clearUX = _.after(2, clearAction);    
+    
+    // ...
+    ar = someWeekDays();
+    day = (ar[ar.length -1]).substr(-10);
+        
+    // get data for the latest weekday
+	sqliteSQL({"url": "/home/ubuntu/sql/rd1.db", "stmt": "SELECT max(Time) FROM rd"}, function(d) {
+	
+		var date = d[0]["max(Time)"];
+		
+		// test different date
+		if (date.substr(0,10) !== day) {
+		    document.getElementById("warning").textContent = "No data available for " + day + ". Latest available trade timestamp: " + date;
+        }
+
+		// date selectors
+		date = date.substr(0, 10);
+		document.getElementById("date-from").value = date;
+		document.getElementById("date-to").value = date;
+		
+		// ...
+		updateDateButtons(someWeekDays((new Date(date)).getTime()));
+	
+		//clearAction();
+		clearUX();
+	});
+
+    // ISIN codes
+	sqliteSQL({"url": "/home/ubuntu/sql/rd1.db", "stmt": "SELECT DISTINCT ISIN, Name FROM rd ORDER BY Name"}, function(d) {
+
+        var ar = [],
+            markup = "";
+        
+        ar = _.map(d, function(d) {return "<option value='" + d.ISIN + "'>" + d.Name + "&nbsp;&nbsp;" + d.ISIN + "</option>"; });
+        markup = "<option value='all'>All</option>" + ar.join("");
+        
+        document.getElementById("isin1").innerHTML = markup;
+        document.getElementById("isin2").innerHTML = markup;
+        
+        // global var
+        isin_all = _.object(_.map(d, function(d) {return [d.ISIN, d.Name]; }));
+        
+        clearUX();
+    });
+}
+
 
 
 // ToDo: possibly get all id's and clear screen
@@ -482,75 +325,49 @@ function clearScreen() {
 
 
 // d: data
-function showResults(d, isin1, isin2) {
+function showTables(d) {
 
-      var group = {}, data = [];
+    var group = {}, 
+        data = [], kees = [],
+        
+        diag = document.getElementById("diagram").value,
+        isin1 = document.getElementById("isin1").value,
+        isin2 = document.getElementById("isin2").value
+        
+        ;
       
-      // -- update from and to dates in UX
-      document.getElementById("date-from").value = (d[0].Time).substr(0,10);
-      document.getElementById("date-to").value = (d[d.length - 1].Time).substr(0,10);
-      
+    // ...	
+    tableTransactions("table2", d);
 
-      // --- filter for buyer/seller ---
-      var traders = _.union(_.pluck(d, "buyer").concat(_.pluck(d, "seller")));
-      
-      var ar = _.map(["All"].concat(traders), function(d) {return "<option>" + d + "</option>"; });
-      document.getElementById("buyers").innerHTML = ar.join();
-      document.getElementById("sellers").innerHTML = ar.join();
-      
-      var buyer_id = document.getElementById("buyers").value;
-      var seller_id = document.getElementById("sellers").value;
-      
-      if (buyer_id !== "All" || seller_id !== "All") {
-      
-          if (buyer_id !== "All") {
-              d = _.filter(d, function(d) {return d.buyer === buyer_id; });
-          }        
+	// --- group raw data by ISIN for tables ---
 
-          if (seller_id !== "All") {
-              d = _.filter(d, function(d) {return d.seller === seller_id; });
-          }        
-      }
-      
-    
-	  // --- group raw data by ISIN for tables ---
-	  group = _.groupBy(d, "ISIN");
-	  
-      // ...	  
-	  data = _.map(_.keys(group), function(d) {return _.extend(stats(_.pluck(group[d], "Price")), {title: d}); });
-	  
-	  tableStats("table1", data);
-	
-		MG.data_table({
-			title: "A table",
-			description: "A table",
-			data: d
-			//show_tooltips: true
-		})
-		.target("#table2")
-		.number({accessor: "counter", label: "Row"})
-		.title({accessor: "ISIN", label: "ISIN", color: "gray"})
-		//.number({ accessor: 'Price_old', label: 'Last'})
-		.number({ accessor: 'Price', label: 'Price', color: "blue"})
-		.number({ accessor: 'Time', label: 'Time'})
-		.text({ accessor: 'Name', label: 'Name'})
-		.number({ accessor: 'Volume', label: 'Volume'})
-		.text({ accessor: 'buyer', label: 'Buyer', color: function(d) {return d === "RD" ? "blue" : "auto"; }})
-		.text({ accessor: 'seller', label: 'Seller', color: function(d) {return d === "RD" ? "blue" : "auto"; }})
-		.display();  
-	
-	
-		// --- generate diagrams ---
-	
-	    convertDateTime(d, "Time");
+	convertDateTime(d, "Time");
+
+	group = _.groupBy(d, "ISIN");
+	kees = _.keys(group);
 	    
-		group = _.groupBy(d, "ISIN");
+	data = _.map(kees, function(d) {return _.extend(stats(_.pluck(group[d], "Price")), {isin: d}, {vwap: vwap(group[d], "Price", "Volume") }, {name: isin_all[d] }); });
+	  
+	tableStats("table1", data);
+	  
+	// --- generate diagrams ---
+	  
+	if (diag === "individual") {
 		
-		console.log(group);
-	
-		//var diag = document.getElementById("diagram").value;
-		
-		if (! _.isEmpty(group[isin1])) {
+	    if (isin1 === "all") {
+	        isin1 = (kees.length > 0) ? kees[0] : null ;
+	        
+	        if (isin1 !== null) {document.getElementById("isin1").value = isin1; }
+	    }
+
+	    if (isin2 === "all") {
+	        isin2 = (kees.length > 1) ? kees[1] : null ;
+
+	        if (isin2 !== null) {document.getElementById("isin2").value = isin2; }
+	    }
+			
+	    if ((! _.isEmpty(isin1)) && (! _.isEmpty(group[isin1]))) {
+	    
 			mgDiagram("diagram11", "line", group[isin1], isin1);
 
 			mgDiagram("diagram12", "point", group[isin1], isin1);
@@ -560,9 +377,10 @@ function showResults(d, isin1, isin2) {
 			mgHistogram("histogram11", group, isin1, "Price");
 
 			mgHistogram("histogram12", group, isin1, "Volume");
-		}
+		 }
 
-		if (! _.isEmpty(group[isin2]) && isin1 !== isin2) {
+		 if (isin1 !== isin2 && (! _.isEmpty(isin1)) && (! _.isEmpty(group[isin2]))) {
+		 
 			mgDiagram("diagram21", "line", group[isin2], isin2);
 
 			mgDiagram("diagram22", "point", group[isin2], isin2);
@@ -572,62 +390,26 @@ function showResults(d, isin1, isin2) {
 			mgHistogram("histogram21", group, isin2, "Price");		
 
 			mgHistogram("histogram22", group, isin2, "Volume");
-		}
+		 }
+    }	
 }
 
 
-//call R function: stats::sd(x=data)
-function visualise() {
+/*
+  . Warning: This is a preliminary function
   
-  var isin1 = document.getElementById("isin1").value,
-      isin2 = document.getElementById("isin2").value,
-      from = document.getElementById("date-from").value,
-      to = document.getElementById("date-to").value, 
-      
-      stmt = "", 
-      i = 1, d1 = 0, d2 = 0;
-  
-  // ...
-  stmt = (isin1 === isin2) ? ("ISIN = '" + isin1 + "'") : ("ISIN IN ('" + isin1 + "', '" + isin2 + "')") ;
-      
-  // Make select statements
-  if (from === "" && to === "") {
-      
-      stmt = "SELECT * FROM rd WHERE " + stmt + " order by Time ASC, ISIN ASC";
-  
-  } else {
-  
-      from = (from === "") ? "1970-01-01" : from;
-      to = (to === "") ? "2050-01-01" : to;
-      
-      // check figures
-      // These are just to compare times so there is no issue of local time or UTC time
-      d1 = (new Date(from)).getTime();
-      d2 = (new Date(to)).getTime();
-      if (d1 > d2) {
-          tekst("warning", "p", "Date selection error: Please select a From date that is before the To date!");
-          return;
-      }
-  
-      // continue
-      stmt = "SELECT * FROM rd WHERE " + stmt + " AND Time between '" + from + "' AND date('" + to + "', '+1 days') order by Time ASC, ISIN ASC";
-  }    
+  . [seller, buyer, counter] is added
 
-  // Get new data
-  sqliteSQL({"url": "/home/ubuntu/sql/rd1.db", "stmt": stmt}, function(d) {
-  
-  // ...
-  if (_.isEmpty(d)) {
-      tekst("warning", "p", "No data available for given selections!");
-      return;
-  
-  } else {
-  
-	  // --- Preliminary solution: extend with seller and buyer ---
-	  d.forEach(function(v) {
+*/
+function addToRawData(d) {
+
+    var i = 1;
+
+	// --- Preliminary solution: extend with seller and buyer ---
+	d.forEach(function(v) {
 		  
 		  // ToDo: now it is a random sample of counterparties
-		  var other = _.sample(["Nykredit", "BRF", "DLR", "Totalkredit"]);
+		  var other = _.sample(["BRF", "Skibs", "Danske", "DLR", "Føroya", "Kommune", "Fiskeri", "LR", "Nordea", "Nyk", "Total", "Uni"]);
 		   
 		  v.seller = (Math.random() < 0.5) ? "RD" : other;  // RD 30 % of the samples
 		  v.buyer = (v.seller === "RD") ? other : "RD";
@@ -637,16 +419,75 @@ function visualise() {
 	      
 	      // return
 	      return v;
-	  
-	  });
-	  
-	  console.log("all data: ", d);
-	  
-	  showResults(d, isin1, isin2);
+	});
+}
 
+
+//call R function: stats::sd(x=data)
+function transactions() {
+
+    setAction("Getting data!", false, 0.85);
+  
+    var stmt = "", 
+        j = 0,
+        dates = [],
+        
+        isin1 = document.getElementById("isin1").value,
+        isin2 = document.getElementById("isin2").value;
+  
+    // ...
+    dates = getToFrom();
+  
+    if (_.isEmpty(dates)) {
+        // text is sent from getToFrom() function
+        clearAction();
+        return;
+  
+    } else {
+  
+        j = (dates.length === 1) ? 0 : 1 ;
     }
-  }); 
-};
+    
+    // ...
+    if (isin1 !== "all" || isin2 !== "all") {
+        stmt = (isin1 === isin2) ? ("ISIN = '" + isin1 + "' AND ") : ("ISIN IN ('" + isin1 + "', '" + isin2 + "') AND ") ;
+    
+    }
+  
+    // Get new data
+    stmt = "SELECT * FROM rd WHERE " + stmt + " Time BETWEEN '" + dates[0] + "' AND date('" + dates[j] + "', '+1 days') ORDER BY Time ASC, ISIN ASC";
+  
+    sqliteSQL({"url": "/home/ubuntu/sql/rd1.db", "stmt": stmt}, function(d) {
+  
+        var txt = "";
+  
+	    // ...
+	    if (_.isEmpty(d)) {
+            
+            txt = (j === 0) ? ("No data available for: " + dates[0] + ".") : ("No data available from: " + dates[0] + " to: " + dates[j] + ".") ;
 
+		    tekst("warning", "p", txt);
+  
+	    } else {
+  
+		    addToRawData(d);
+		    
+		    // Note: Possibly switch on this check: all volumes must be > 0
+		    //d = _.filter(d, function(d) {return d.Volume > 0; });
+		  
+		    showTables(d);
+	  
+		    console.log(d);
+	    }
+	  
+	    // ...
+	   clearAction();
+    }); 
+
+}
+
+
+// --- init ---
+uxInit();
 
   

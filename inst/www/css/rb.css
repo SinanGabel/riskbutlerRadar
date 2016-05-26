@@ -211,8 +211,12 @@ a:hover {
     color: #ccc;
 }
 
-.text-blue{
-    color:rgb(8,74,182);
+.text-blue {
+    color: rgb(8,74,182);
+}
+
+.warning {
+   color: #e91e63;
 }
 
 
@@ -307,6 +311,40 @@ line-height : 1em;
 .pricing-table-header{background:#2d3e50;color:#fff;padding-top:1em;padding-bottom:1em;font-size:4em;margin:0;font-weight:100;}
 .pricing-table-list{list-style-type:none;margin:0;padding:0;text-align:center;}
 .pricing-table-list li{padding:0.8em 0;background:#f7f7f7;border-bottom:1px solid #e7e7e7;}
+
+
+/* action */
+
+#action {
+  display: none;
+  position: fixed;
+  background-color: white;
+  opacity: 0.9;
+  filter: alpha(opacity=90);  /* for IE8 and prior */
+  font-size: 1.5em;
+  font-weight: bold;
+  width: 100%;
+  height: 1250px;
+  text-align: center;
+  color: black;
+  padding-top: 100px;
+  z-index: 99;
+}
+
+#action #msg {
+  position: relative;
+  margin: 0px auto;
+}
+
+#action #loading-icon {
+  background: url('../img/loader.gif');
+  position: relative;
+  margin: 0px auto;
+  width: 16px;
+  height: 11px;
+  margin-bottom: 15px;
+}
+
 
 
 @media (max-width: 62em) {
