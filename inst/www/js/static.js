@@ -8,7 +8,7 @@
   . warning: on local machine e.g. Mac set in .htaccess file => Header set Access-Control-Allow-Origin "*"
 
 */
-ocpu.seturl("https://riskbutler.net/ocpu/github/sinangabel/radar/R");
+//ocpu.seturl("https://riskbutler.net/ocpu/github/sinangabel/radar/R");
 
 
 // --- global vars ---
