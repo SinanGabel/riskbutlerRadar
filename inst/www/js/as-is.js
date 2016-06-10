@@ -110,41 +110,6 @@ function sqliteSQL(params, callback) {
 
 // --- filter.js ---
 
-/*
-  . id: DOM id
-  . m: matrix
-  . ToDo: possibility to format numbers
-  .    . add thead
-       . add class as parameter
-*/
-function makeTable(id, m, cls) {
-
-    cls = cls || "pure-table pure-table-striped";
-
-	var table = document.createElement("table"),
-	    tb = document.createElement("tbody"),
-		tr, td, trs,
-		i=0, j=0,
-		l=m.length, ll=0;
-
-	for (i = 0; i < l; i++) {
-		tr = document.createElement("tr");
-		trs = ([i]).concat(m[i]);  // i is a row counter
-		ll = trs.length;
-		
-		for (j = 0; j < ll; j++) {
-		   td = document.createElement("td");
-		   td.textContent = trs[j];
-		   tr.appendChild(td);
-		}
-		tb.appendChild(tr);
-	}
-	table.appendChild(tb);
-	
-	// if l>2500 td: padding 6px
-	if (l < 2500) {table.setAttribute("class", cls); }
-	document.getElementById(id).appendChild(table);
-}
 
 /*
   . t: html DOM table

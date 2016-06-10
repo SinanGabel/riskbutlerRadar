@@ -1,47 +1,6 @@
 "use strict";
 
 
-/*
-  . id: DOM id
-  . m: matrix
-  . ToDo: possibility to format numbers
-  .    . add thead
-       . add class as parameter
-*/
-function makeTable(id, m, html_cols) {
-
-	var table = document.createElement("table"),
-	    tb = document.createElement("tbody"),
-		tr, td, trs,
-		i=0, j=0,
-		l=m.length, ll=0;
-
-	for (i = 0; i < l; i++) {
-		tr = document.createElement("tr");
-		trs = ([i]).concat(m[i]);  // i is a row counter
-		ll = trs.length;
-		
-		for (j = 0; j < ll; j++) {
-		   td = document.createElement("td");
-		   
-		   if (html_cols !== undefined && html_cols.indexOf(j) !== -1) {
-
-		       td.innerHTML = trs[j];		   
-		   } else {
-		       td.textContent = trs[j];
-		   }
-		   
-		   tr.appendChild(td);
-		}
-		tb.appendChild(tr);
-	}
-	table.appendChild(tb);
-	
-	// if l>2500 td: padding 6px
-	if (l < 2500) {table.setAttribute("class", "pure-table pure-table-striped"); }
-	document.getElementById(id).appendChild(table);
-}
-
 
 /*
    --- About time ---
@@ -61,32 +20,6 @@ function convertDateTime(data, key) {
 	    v[key] = new Date((v[key]).replace(/-/g, "/"));
 		return v; 
 	});
-}
-
-
-/*
- . data: [obj, obj, ...]
- 
- . (1) RD & ISIN
- . (2) ! RD & ISIN
- . (3) RD & ! ISIN
- . (4) ! RD & ! ISIN
-*/ 
-function addColorAccessor(data, isin, issuer) {
-
-    issuer = issuer || "RD";
-
-    data.forEach(function(d) {
-    
-        if (d.ISIN === isin) {  
-        
-            d.cat = (d.buyer === issuer || d.seller === issuer) ? 1 : 2 ;
-            
-        } else {
-            
-            d.cat = (d.buyer === issuer || d.seller === issuer) ? 3 : 4 ;
-        }
-    });
 }
 
 
@@ -145,100 +78,67 @@ function getToFrom() {
 
 // --- other ---
 
-/*
- . 
- 
-*/
-function mgDiagram(id, type, data, isin, baseln) {
+function mgDiagram(id, type, data, isin) {
 
-    //if (data.length < 3) {return;}
+    if (data.length < 3) {return;}
 
-   var stic = _.findWhere(static_codes, {"isin": isin}),
-   
-       json = {
-		  title: stic.name2 + " Price",
-		  description: stic.name + " " + isin + " price development",
+ var json = {
+  title: "Price: " + isin,
+  description: "Price development",
+  data: data,
+  chart_type: type,
+  width: 480,
+  height: 300,
+  //color: '#8C001A',
+  min_y_from_data: true,
+  decimals: 5,
+  //baselines: [{value: s[0].mean, label: 'mean'}],
+  target: document.getElementById(id),
+  x_accessor: "Time",
+  y_accessor: ["Price"]
+  //linked: true
+  };
   
-		  data: data,
-		  chart_type: type,
-		  width: 480,
-		  height: 300,
+  // ...
+  if (type === "point" && data.length > 20 ) {
+
+      json.least_squares = true;
+  }
+
+  if (type === "point-size") {
   
-		  target: document.getElementById(id),
-		  x_accessor: "Time",
-		  y_accessor: ["Price"],
-
-		  show_secondary_x_label: true,
-		  min_y_from_data: true,
-		  decimals: 5,
-  
-		  yax_format: d3.format('.4s'),
-		  y_rug: true,
-		  linked: true };
-  
-    // ...
-    if (type === "point" && data.length > 20 ) {
-
-        json.least_squares = true;
-    }
-
-    if (type === "point-size") {
-  
-      json.title = stic.name2 + " Price & Volume";
-      json.description = stic.name + " " + isin + " price & volume development";
-
-
+      json.title = "Price (point) & Volume (size): " + isin;
+      json.chart_type = "point";
+      json.description = "Price & Volume development";
+      json.color_accessor = "Volume";
       json.size_accessor = "Volume";
       json.size_range = [1,40];      
-    }
+  }
+  
+  // ...
+  MG.data_graphic(json);  
 
-    if (type === "point-group" || type === "point-size") {
-
-      // ...
-      json.chart_type = "point";
-      json.baselines = baseln;
-
-      addColorAccessor(data, isin);  
-      
-      json.color_accessor = "cat";
-      json.color_domain = [1,2,3,4];
-      json.color_range = ["red", "blue", "green", "grey"];
-    }  
-
-    json.data = data;
-
-    // ...
-    MG.data_graphic(json); 
 }
 
-
 // ...
-function mgHistogram(id, data, isin, accessor, marker) {
+function mgHistogram(id, data, isin, accessor) {
 
-    var stic = _.findWhere(static_codes, {"isin": isin});
+    data = _.pluck(data[isin], accessor);
 
     if (data.length < 5) {return;}
 
 	MG.data_graphic({
-		title: stic.name2 + " " + accessor,
+		title: accessor + ": " + isin,
 		description: accessor + " histogram",
-
 		data: data,
 		chart_type: "histogram",
 		width: 480,
 		height: 300,
-
 		//right: 10,
 		bins: 50,
 		bar_margin: 0,
-		
-		markers: marker,
-
 		target: "#" + id,
-
 		y_extended_ticks: true,
-		xax_format: d3.format('.4s'),
-		
 		mouseover: function(d, i) {
 			d3.select("#" + id + " svg .mg-active-datapoint")
 			  .text(accessor + ": " + d3.round(d.x,2) +  "   Count: " + d.y);
@@ -252,7 +152,6 @@ function mgHistogram(id, data, isin, accessor, marker) {
 */
 function tableStatic(id, data) {
 
-/*
     MG.data_table({
         title: "Statistics",
         description: "Table of numbers",
@@ -272,13 +171,6 @@ function tableStatic(id, data) {
     .text({ accessor: "repayment_spec", label: "Repayment spec"})
     .text({ accessor: "repayment_profile", label: "Repayment profile"})
     .display();
-*/    
-    
-    makeTable(id, ([["Currency", "Expiry", "Coupon", "Fixed", "Name", "ISIN", "Issuer", "Callable", "Bond type", "Loan type", "Repayment spec", "Repayment profile"]]).concat(
-    
-      _.map(data, function(d) {return [d.base, d.expiry, d.coupon, d.coupon_fixed, d.name, d.isin, d.issuer_short, d.callable, d.bond_type, d.loan_type, d.repayment_spec, d.repayment_profile]; })
-    
-    ));
 
 }
 
@@ -361,8 +253,6 @@ function sortBonds(order) {
 
 /*
  . bonds()
- 
- . warning: this changes static_codes
 
  . move this later
 
@@ -374,43 +264,36 @@ function xgroupBonds(order) {
         // These must be part of static_codes
         order = order || ["base", "expiry_year", "coupon_fixed", "coupon", "callable"];
 
-        var keys_in_data = [];   
+        var data = [],
+            keys_in_data = [];   
         
         // ...
         keys_in_data = _.keys(isin_all);
         
-        return _.chain(static_codes)
+        data = _.chain(static_codes)
          .filter(function(d) {return keys_in_data.indexOf(d.isin) !== -1; })
          .map(function(d) {d.expiry_year = (d.expiry).substr(0,4); d.group = (_.values(_.pick(d, order))).join(""); return d; })
-         //.groupBy(function(d) {return d.group; })  // change txt key to sort differently
-         //.values()
-         //.flatten()
+         .groupBy(function(d) {return d.group; })  // change txt key to sort differently
          .value();
+                  
+        return data;
 }
 
 
 /*
- . Call as: getBondGroup("DK0009798217") 
+ . 
+*/
+function groupBonds(order) {
  
- . Warning: this requires that static_codes have key "group"
-
-*/
-function getBondGroup(isin) {
-    return _.where(static_codes, {"group": _.findWhere(static_codes, {"isin": isin}).group});
-}
-
-
-/*
- . _.pluck(getBondGroup("DK0009292599"),"isin")  =>  ["DK0009797599", "DK0009292599"]
-
-*/
-function getBondGroupData(isin) {
-
-    var isins = [];
-
-    isins = _.pluck(getBondGroup(isin), "isin")
+    var data = xgroupBonds(order);
     
-    return _.filter(data_all, function(v) {return isins.indexOf(v.ISIN) !== -1; });
+    _.each(data, function(d) {
+    
+        tableStatic("table-1", d); 
+    
+        //mgDiagram("diag-1", type, data, isin);
+    });
+
 }
 
 
@@ -556,9 +439,8 @@ function uxInit() {
         // 
         checkStaticData();
         
-        // add groups to static_codes
-        xgroupBonds();
-                        
+        sortBonds();
+                
         // 
         clearUX();
     });
@@ -567,9 +449,9 @@ function uxInit() {
 
 
 // ToDo: possibly get all id's and clear screen
-function clearScreen(list) {
+function clearScreen() {
 
-    list = list || [ "warning", "diagram11", "diagram21", "diagram12", "diagram22", "diagram13", "diagram23", "histogram11", "histogram21", "histogram12", "histogram22", "table1", "table2"];
+    var list = [ "warning", "diagram11", "diagram21", "diagram12", "diagram22", "diagram13", "diagram23", "histogram11", "histogram21", "histogram12", "histogram22", "table1", "table2"];
 
     list.forEach(function(d) {return document.getElementById(d).textContent = "";});
 }
@@ -625,9 +507,9 @@ function showTables(d) {
 	
 			mgDiagram("diagram13", "point-size", group[isin1], isin1);
 
-			mgHistogram("histogram11",  _.pluck(group[isin1], "Price"), isin1, "Price");
+			mgHistogram("histogram11", group, isin1, "Price");
 
-			mgHistogram("histogram12", _.pluck(group[isin1], "Volume"), isin1, "Volume");
+			mgHistogram("histogram12", group, isin1, "Volume");
 		 }
 
 		 if (isin1 !== isin2 && (! _.isEmpty(isin1)) && (! _.isEmpty(group[isin2]))) {
@@ -638,9 +520,9 @@ function showTables(d) {
 	
 			mgDiagram("diagram23", "point-size", group[isin2], isin2);
 
-			mgHistogram("histogram21", _.pluck(group[isin2], "Price"), isin2, "Price");		
+			mgHistogram("histogram21", group, isin2, "Price");		
 
-			mgHistogram("histogram22", _.pluck(group[isin2], "Volume"), isin2, "Volume");
+			mgHistogram("histogram22", group, isin2, "Volume");
 		 }
     }	
 }
@@ -660,13 +542,10 @@ function addToRawData(d) {
 	d.forEach(function(v) {
 		  
 		  // ToDo: now it is a random sample of counterparties
-		  var list = ["BRF", "Skibs", "Danske", "DLR", "Føroya", "Kommune", "Fiskeri", "LR", "Nordea", "Nyk", "Total", "Uni"];
+		  var other = _.sample(["BRF", "Skibs", "Danske", "DLR", "Føroya", "Kommune", "Fiskeri", "LR", "Nordea", "Nyk", "Total", "Uni"]);
 		   
-		  v.seller = (Math.random() < 0.4) ? "RD" : _.sample(list) ;  
-		  
-		  v.buyer = (Math.random() < 0.4) ? "RD" : _.sample(list);
-		  
-		  if (v.seller === v.buyer) {v.buyer = _.sample(_.without(list.concat("RD"), v.seller)); }
+		  v.seller = (Math.random() < 0.5) ? "RD" : other;  // RD 30 % of the samples
+		  v.buyer = (v.seller === "RD") ? other : "RD";
 	  
 	      // counter
 	      v.counter = i++;
@@ -685,12 +564,15 @@ function getISIN(m) {
 
     var isin1 = "", isin2 = "";
     
+
     if (m === "two") {
         isin1 = document.getElementById("isin1").value,
         isin2 = document.getElementById("isin2").value;
     
         return (isin1 === isin2) ? [isin1] : [isin1, isin2] ;
     }
+
+
 }
 
 
@@ -749,191 +631,6 @@ function transactions() {
 		    showTables(d);
 	  
 		    console.log(d);
-	    }
-	  
-	    // ...
-	   clearAction();
-    }); 
-
-}
-
-
-/*
-
- . showTrades(data_all, mean) 
- 
-*/
-function showTrades() {
-
-    var data = [], isins = [],
-        i = 0, j = 0,
-        div7 = document.getElementById("diag-7"),
-        div8 = document.getElementById("diag-8");
-
-	// ...		    
-	data_all = _.chain(data_all)
-		 .groupBy(function(d) {return d.ISIN + (d.Time).substr(0,10); })
-		 .map(function(d) {var avg = vwap(d,"Price","Volume"), volm = math.sum(_.pluck(d,"Volume")); return {ISIN: d[0].ISIN, date: (d[0].Time).substr(0,10), mean: avg, volume: volm, stats: stats(math.subtract(_.pluck(d, "Price"), avg)), data: d };})
-		 .sortBy(function(d) {return Math.max(d.stats.max, -d.stats.min);})
-		 .reverse()
-		 .map(function(d) {d.row = i++; return d;})
-		 .value();
-	
-	// ...
-	makeTable("table-3", ([["Date", "Name", "ISIN", "Count", "Mean", "Diff", "Min", "Max", "Range", "Volume"]]).concat(_.map(data_all, function(d) {return [d.date, d.data[0].Name, d.ISIN, d.stats.length, d.mean.toFixed(2), ((Math.abs(d.stats.max) > Math.abs(d.stats.min)) ? d.stats.max : d.stats.min ).toFixed(2), d.stats.min.toFixed(2), d.stats.max.toFixed(2), d.stats.range.toFixed(2), d.volume.toLocaleString() ]; })));
-
-    // ...
-/*
-    data = _.chain(data_all)
-            .map(function(d) {_.each(d.data, function(f) {f.mean = d.mean; return f; }); return d.data; })
-            .flatten()
-            .map(function(d) {return [d.Time, (d.Price - d.mean).toFixed(2), d.Price, d.mean.toFixed(2), d.Name, d.ISIN, d.buyer, d.seller, d.Volume]; })
-            .sortBy(function(d) {return Math.abs(d[1]); })
-            .reverse()
-            .value();
-
-    makeTable("table-6", ([["Time", "Diff", "Price", "Mean", "Name", "ISIN", "Buyer", "Seller", "Volume"]]).concat(data));
-*/
-
-    j = 1;
-    data = _.chain(data_all)
-            .map(function(d) {_.each(d.data, function(f) {f.mean = d.mean; f.diff = f.Price - d.mean; return f; }); return d.data; })
-            .flatten()
-            .sortBy(function(d) {return Math.abs(d.diff); })
-            .reverse()
-            .each(function(d) {return d.counter = j++; })
-            .value();
-
-    MG.data_table({
-			title: "Table",
-			description: "Table",
-			data: data
-		})
-        .target("#table-6")
-		.number({accessor: "counter", label: "Row"})
-		.text({accessor: "Time", label: "Time"})
-		.number({accessor: "diff", label: "Diff", color: "blue", value_formatter: function(d) {return d.toFixed(2); } })
-		.number({accessor: "Price", label: "Price"})
-		.number({accessor: "mean", label: "Mean", value_formatter: function(d) {return d.toFixed(2); } })
-		.text({accessor: "Name", label: "Name"})
-		.text({accessor: "ISIN", label: "ISIN", color: d3.scale.category20() })
-		.text({accessor: "buyer", label: "Buyer", color: function(d) {return d === "RD" ? "red" : "auto"; }})
-		.text({accessor: "seller", label: "Seller", color: function(d) {return d === "RD" ? "red" : "auto"; }})
-		.number({accessor: "Volume", label: "Volume", format: "count" })
-		.display();  
-    
-    
-    // Make change to time format here because in the tables we want another format of time, else just add another element to the objects
-    data_all.forEach(function(d) {
-        
-        convertDateTime(d.data, "Time"); 
-    });
-    
-    // for each ISIN ...
-    isins = _.pluck(data_all, "ISIN");
-    
-    j = 0;
-    isins.forEach(function(d) {
-    
-        var data = [],
-            el,
-            mean = 0;
-                   
-        // ...
-        data = getBondGroupData(d);
-        
-        // ...
-        mean = _.findWhere(data, {ISIN: d}).mean;
-        
-        // ...
-        data = _.flatten(_.pluck(data,"data"));
-
-        // ...
-        j++;
-        el = document.createElement("div");
-        el.setAttribute("id", "diag-7" + j);
-        div7.appendChild(el);
-                
-        // making a copy of data so that data does not change while drawing
-        mgDiagram("diag-7" + j, "point-group", data, d, [{label: "mean", value: mean }]);
-
-        // ...
-        j++;
-        el = document.createElement("div");
-        el.setAttribute("id", "diag-7" + j);
-        div7.appendChild(el);
-        
-        // ...
-        data = _.findWhere(data_all, {ISIN: d}).data;
-                
-        // making a copy of data so that data does not change while drawing
-        mgDiagram("diag-7" + j, "point-size", data, d, [{label: "mean", value: mean }]);
-
-        // ...
-        el = document.createElement("div");
-        el.setAttribute("id", "diag-8" + j);
-        div8.appendChild(el);
-        
-        // ...
-        //mgHistogram("diag-8" + j, (_.pluck(data, "Price")).concat([mean]), d, "Price", [{label: "mean", value: mean }]);	
-        mgHistogram("diag-8" + j, _.pluck(data, "Price"), d, "Price");	
-        
-    });	
-}
-
-
-/*
-
- . call R function: stats::sd(x=data)
-
-*/ 
-function go() {
-
-    setAction("Getting data!", false, 0.85);
-  
-    var stmt = "", 
-        j = 0,
-        dates = [];
-  
-    // ...
-    dates = getToFrom();
-  
-    if (_.isEmpty(dates)) {
-        // text is sent from getToFrom() function
-        clearAction();
-        return;
-  
-    } else {
-  
-        j = (dates.length === 1) ? 0 : 1 ;
-    }
-      
-    // Get new data
-    stmt = "SELECT * FROM rd WHERE " + stmt + " Time BETWEEN '" + dates[0] + "' AND date('" + dates[j] + "', '+1 days') ORDER BY Time ASC, ISIN ASC";
-  
-    sqliteSQL({"url": "/home/ubuntu/sql/rd1.db", "stmt": stmt}, function(f) {
-  
-        var txt = "", 
-            i = 1;
-  
-	    // ...
-	    if (_.isEmpty(f)) {
-            
-            txt = (j === 0) ? ("No data available for: " + dates[0] + ".") : ("No data available from: " + dates[0] + " to: " + dates[j] + ".") ;
-
-		    tekst("warning", "p", txt);
-  
-	    } else {
-  
-		    // ...
-		    addToRawData(f);
-		    
-		    data_all = f;
-		    
-		    // Possibly keep data and only call if new selections
-		    showTrades();
-	  
-		    console.log(data_all);
 	    }
 	  
 	    // ...
