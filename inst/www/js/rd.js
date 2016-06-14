@@ -151,9 +151,9 @@ function getToFrom() {
 */
 function mgDiagram(id, type, data, isin, baseln) {
 
-    //if (data.length < 3) {return;}
+    diagramSize();
 
-   var stic = _.findWhere(static_codes, {"isin": isin}),
+    var stic = _.findWhere(static_codes, {"isin": isin}),
    
        json = {
 		  title: stic.name2 + " Price",
@@ -161,13 +161,16 @@ function mgDiagram(id, type, data, isin, baseln) {
   
 		  data: data,
 		  chart_type: type,
-		  width: 480,
-		  height: 300,
+		  width: r_width,
+		  height: r_height,
   
 		  target: document.getElementById(id),
 		  x_accessor: "Time",
 		  y_accessor: ["Price"],
 
+          x_mouseover: function(d) {return d.Time + "  "; },
+          y_mouseover: function(d) {return ((d.ISIN === isin) ? "" : (" " + d.Name + " " + d.ISIN)) + " P:" + d.Price + " B: " + d.buyer + " S: " + d.seller + " Diff: " + (d.diff).toFixed(2); },
+		  
 		  show_secondary_x_label: true,
 		  min_y_from_data: true,
 		  decimals: 5,
@@ -190,6 +193,9 @@ function mgDiagram(id, type, data, isin, baseln) {
 
       json.size_accessor = "Volume";
       json.size_range = [1,40];      
+
+      json.y_mouseover = function(d) {return " P:" + d.Price + " B: " + d.buyer + " S: " + d.seller + " V: " + (d.Volume).toLocaleString() ; };
+
     }
 
     if (type === "point-group" || type === "point-size") {
@@ -215,9 +221,15 @@ function mgDiagram(id, type, data, isin, baseln) {
 // ...
 function mgHistogram(id, data, isin, accessor, marker) {
 
-    var stic = _.findWhere(static_codes, {"isin": isin});
+    diagramSize();
 
-    if (data.length < 5) {return;}
+    var bins = 0,
+        stic = _.findWhere(static_codes, {"isin": isin});
+
+    //if (data.length < 5) {return;}
+    
+    // bins
+    bins = (data.length < 30) ? 20 : 40; 
 
 	MG.data_graphic({
 		title: stic.name2 + " " + accessor,
@@ -225,11 +237,11 @@ function mgHistogram(id, data, isin, accessor, marker) {
 
 		data: data,
 		chart_type: "histogram",
-		width: 480,
-		height: 300,
+		width: r_width,
+		height: r_height,
 
 		//right: 10,
-		bins: 50,
+		bins: bins,
 		bar_margin: 0,
 		
 		markers: marker,
@@ -241,7 +253,7 @@ function mgHistogram(id, data, isin, accessor, marker) {
 		
 		mouseover: function(d, i) {
 			d3.select("#" + id + " svg .mg-active-datapoint")
-			  .text(accessor + ": " + d3.round(d.x,2) +  "   Count: " + d.y);
+			  .text(accessor + " : [ " + (d.x).toFixed(2) + ", " + (d.x + d.dx).toFixed(2) +  " ]  Count: " + d.y);
 		}
 	});
 }
@@ -748,7 +760,7 @@ function transactions() {
 		  
 		    showTables(d);
 	  
-		    console.log(d);
+		    //console.log(d);
 	    }
 	  
 	    // ...
@@ -761,6 +773,8 @@ function transactions() {
 /*
 
  . showTrades(data_all, mean) 
+ 
+ . Number formatting: see http://bl.ocks.org/zanarmstrong/05c1e95bf7aa16c4768e
  
 */
 function showTrades() {
@@ -780,7 +794,29 @@ function showTrades() {
 		 .value();
 	
 	// ...
-	makeTable("table-3", ([["Date", "Name", "ISIN", "Count", "Mean", "Diff", "Min", "Max", "Range", "Volume"]]).concat(_.map(data_all, function(d) {return [d.date, d.data[0].Name, d.ISIN, d.stats.length, d.mean.toFixed(2), ((Math.abs(d.stats.max) > Math.abs(d.stats.min)) ? d.stats.max : d.stats.min ).toFixed(2), d.stats.min.toFixed(2), d.stats.max.toFixed(2), d.stats.range.toFixed(2), d.volume.toLocaleString() ]; })));
+	//makeTable("table-3", ([["Date", "Name", "ISIN", "Count", "Mean", "Diff", "Min", "Max", "Range", "Volume"]]).concat(_.map(data_all, function(d) {return [d.date, d.data[0].Name, d.ISIN, d.stats.length, d.mean.toFixed(2), ((Math.abs(d.stats.max) > Math.abs(d.stats.min)) ? d.stats.max : d.stats.min ).toFixed(2), d.stats.min.toFixed(2), d.stats.max.toFixed(2), d.stats.range.toFixed(2), d.volume.toLocaleString() ]; })));
+
+
+    // ...
+    MG.data_table({
+			title: "Table",
+			description: "Table",
+			data: data_all
+		})
+        .target("#table-3")
+		.text({accessor: "date", label: "Date"})
+		.number({accessor: "ISIN", label: "Name", value_formatter: function(d) {return isin_all[d]; }, color: d3.scale.category20() })
+		.text({accessor: "ISIN", label: "ISIN", color: d3.scale.category20() })
+		.number({accessor: "stats", label: "Count", value_formatter: function(d) {return d.length; }})
+		.number({accessor: "mean", label: "Mean", round: 2})
+		.number({accessor: "stats", label: "Diff", value_formatter: function(d) {return (Math.abs(d.max) > Math.abs(d.min)) ? (d.max).toFixed(2) : (d.min).toFixed(2) ; }, color: "blue"})
+		.number({accessor: "stats", label: "Min", value_formatter: function(d) {return (d.min).toFixed(2); }})
+		.number({accessor: "stats", label: "Max", value_formatter: function(d) {return (d.max).toFixed(2); }})
+		.number({accessor: "stats", label: "Range", value_formatter: function(d) {return (d.range).toFixed(2); }})
+		.number({accessor: "volume", label: "Volume", value_formatter: d3.format(",.0f") })
+		.display();  
+
+
 
     // ...
 /*
@@ -815,11 +851,11 @@ function showTrades() {
 		.number({accessor: "diff", label: "Diff", color: "blue", value_formatter: function(d) {return d.toFixed(2); } })
 		.number({accessor: "Price", label: "Price"})
 		.number({accessor: "mean", label: "Mean", value_formatter: function(d) {return d.toFixed(2); } })
-		.text({accessor: "Name", label: "Name"})
+		.text({accessor: "Name", label: "Name", color: d3.scale.category20() })
 		.text({accessor: "ISIN", label: "ISIN", color: d3.scale.category20() })
 		.text({accessor: "buyer", label: "Buyer", color: function(d) {return d === "RD" ? "red" : "auto"; }})
 		.text({accessor: "seller", label: "Seller", color: function(d) {return d === "RD" ? "red" : "auto"; }})
-		.number({accessor: "Volume", label: "Volume", format: "count" })
+		.number({accessor: "Volume", label: "Volume", value_formatter: d3.format(",.0f") })
 		.display();  
     
     
@@ -933,7 +969,7 @@ function go() {
 		    // Possibly keep data and only call if new selections
 		    showTrades();
 	  
-		    console.log(data_all);
+		    // console.log(data_all);
 	    }
 	  
 	    // ...

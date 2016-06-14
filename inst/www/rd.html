@@ -68,20 +68,20 @@
   <!-- Tabs -->
   <div id="tabs">
 	<ul>
-		<li><a href="#tabs-5">Selection</a></li>
-		<li><a href="#tabs-3">Range</a></li>
-		<li><a href="#tabs-6">Trades</a></li>
-		<li><a href="#tabs-7">Points</a></li>
-		<li><a href="#tabs-8">Histograms</a></li>
-		<li><a href="#tabs-1">Bonds</a></li>
-		<li><a href="#tabs-2">Transactions</a></li>
-		<li><a href="#tabs-4">Messages</a></li>
+		<li><a href="#tabs-1">Selection</a></li>
+		<li><a href="#tabs-2">Range</a></li>
+		<li><a href="#tabs-3">Trades</a></li>
+		<li><a href="#tabs-4">Points</a></li>
+		<li><a href="#tabs-5">Histograms</a></li>
+		<li><a href="#tabs-6">Bonds</a></li>
+		<li><a href="#tabs-7">Messages</a></li>
+		<li><a href="#tabs-8">Settings</a></li>
 	</ul>
 
 
-	<div id="tabs-5">
+	<div id="tabs-1">
 	
-<!-- *** tab 5 *** -->	
+<!-- *** tab 1 *** -->	
 
     <!-- Date selectors -->
 	<form class="pure-form pure-form-stacked">
@@ -106,57 +106,6 @@
 		</fieldset>
 	</form>  	
 
-  <br><br><hr>
-
-  <button class="pure-button button-three" type="button" onclick="clearScreen(['table-3','table-6','diag-7', 'diag-8']);">Clear screen</button>
-  <button class="pure-button button-two" type="button" onclick="go();">Go</button>
-
-
-<!-- *** tab 5 *** -->	
-	
-	</div>
-
-
-	<div id="tabs-6">
-	
-<!-- *** tab 6 *** -->	
-
-      <div id="table-6"></div>
-
-<!-- *** tab 6 *** -->	
-	
-	</div>
-
-	<div id="tabs-7">
-	
-<!-- *** tab 7 *** -->
-
-      <p><span style="color:red;">Red</span>: Bond traded by RD. &nbsp; &nbsp; <span style="color:blue;">Blue</span>: Bond not traded by RD. &nbsp; &nbsp; <span style="color:green;">Green</span>: Another similar* Bond traded by RD. &nbsp; &nbsp; <span style="color:grey;">Grey</span>: Another similar* Bond but not traded by RD.</p>	
-
-      <br><br><br>
-      
-      <div id="diag-7"></div>
-
-<!-- *** tab 7 *** -->	
-	
-	</div>
-
-	<div id="tabs-8">
-	
-<!-- *** tab 8 *** -->
-
-      <br><br><br>
-      
-      <div id="diag-8"></div>
-
-<!-- *** tab 8 *** -->	
-	
-	</div>
-
-	
-	<div id="tabs-2">
-	
-<!-- *** tab 2 *** -->	  
 
     <!-- Bond selectors -->
 	<form class="pure-form pure-form-stacked">
@@ -180,125 +129,70 @@
 		</fieldset>
 	</form>  
 
-    <!-- Issuer selectors -->
-	<form class="pure-form pure-form-stacked">
-		<fieldset>
-		    <legend>Issuer selection</legend>
-			<div class="pure-g">
-            
-				<div class="pure-u-1 pure-u-md-1-2">
-					<label for="issuer1">Issuer 1</label>
-					<select id="issuer1">
-					</select>                
-				</div>
 
-				<div class="pure-u-1 pure-u-md-1-2">
-					<label for="issuer2">Issuer 2</label>
-					<select id="issuer2">
-					</select>                
-				</div>
+  <br><br><hr>
 
-			</div>
-		</fieldset>
-	</form>  
-
-    <!-- Issuer selectors -->
-	<form class="pure-form pure-form-stacked">
-		<fieldset>
-		    <legend>Other selections</legend>
-			<div class="pure-g">
-				<div class="pure-u-1">
-					<label for="diagram">Diagram</label>
-					<select id="diagram">
-						<option value="individual">Individual</option>
-						<option value="grouped" disabled>Grouped</option>
-						<option value="none">None</option>
-					</select>
-				</div>
-			</div>
-		</fieldset>
-	</form>  
-
-<!-- 
-
-            <div class="pure-u-1">
-                <label for="buyers">Buyers*</label>
-                <select id="buyers">
-                 <option>All</option>
-                </select>                
-            </div>
-
-            <div class="pure-u-1">
-                <label for="sellers">Sellers*</label>
-                <select id="sellers">
-                 <option>All</option>
-                </select>                
-            </div>
-
-            <div class="pure-u-1 pure-u-sm-1-3 pure-u-md-1-3 pure-u-lg-1-5">
-				<label for="buyer" class="pure-checkbox">
-					<input id="buyer" type="checkbox" value="" checked>
-					Buyer
-				</label>
-
-				<label for="buyer" class="pure-checkbox">
-					<input id="seller" type="checkbox" value="" checked>
-					Seller
-				</label>
-
-            </div>
-
--->
-
-<br><br><hr>
-
-<button class="pure-button button-three" type="button" onclick="clearScreen();">Clear screen</button>
-<button class="pure-button button-two" type="button" onclick="transactions();">Transactions</button>
-<button class="pure-button button-two" type="button" onclick="analyse();">Auto-Analyse*</button>
-<button class="pure-button button-five" type="button" >Clusters*</button>
-<button class="pure-button button-five" type="button" >Export*</button>
-<button class="pure-button button-five" type="button" >Email*</button>
-<button class="pure-button button-five" type="button" >Print*</button>
-
-<br><br><hr>
-
-  <div class="pure-g">
-    <div class="pure-u-1 pure-u-lg-1-2" id="diagram11"></div>
-    <div class="pure-u-1 pure-u-lg-1-2" id="diagram21"></div>
-  </div>
-
-  <div class="pure-g">
-    <div class="pure-u-1 pure-u-lg-1-2" id="diagram12"></div>
-    <div class="pure-u-1 pure-u-lg-1-2" id="diagram22"></div>
-  </div>
-
-  <div class="pure-g">
-    <div class="pure-u-1 pure-u-lg-1-2" id="diagram13"></div>
-    <div class="pure-u-1 pure-u-lg-1-2" id="diagram23"></div>
-  </div>
-
-  <div class="pure-g">
-    <div class="pure-u-1 pure-u-lg-1-2" id="histogram11"></div>
-    <div class="pure-u-1 pure-u-lg-1-2" id="histogram21"></div>
-  </div>
-
-  <div class="pure-g">
-    <div class="pure-u-1 pure-u-lg-1-2" id="histogram12"></div>
-    <div class="pure-u-1 pure-u-lg-1-2" id="histogram22"></div>
-  </div>
+  <button class="pure-button button-three" type="button" onclick="clearScreen(['table-3','table-6','diag-7', 'diag-8']);">Clear screen</button>
+  <button class="pure-button button-two" type="button" onclick="go();">Go</button>
 
 
-  <div id="table1"></div>
-  <div id="table2"></div>
-
-
-<!-- *** tab 2 *** -->
+<!-- *** tab 1 *** -->	
 	
 	</div>
+
+	<div id="tabs-2">
 	
-	<div id="tabs-1">
+<!-- *** tab 2 *** -->	
+
+      <div id="table-3"></div>
+  
+      <div id="diag-3"></div>
+
+<!-- *** tab 2 *** -->	
 	
-<!-- *** tab 1 *** -->	
+	</div>
+
+
+	<div id="tabs-3">
+	
+<!-- *** tab 3 *** -->	
+
+      <div id="table-6"></div>
+
+<!-- *** tab 3 *** -->	
+	
+	</div>
+
+	<div id="tabs-4">
+	
+<!-- *** tab 4 *** -->
+
+      <p><span style="color:red;">Red</span>: Bond traded by RD. &nbsp; &nbsp; <span style="color:blue;">Blue</span>: Bond not traded by RD. &nbsp; &nbsp; <span style="color:green;">Green</span>: Another similar* Bond traded by RD. &nbsp; &nbsp; <span style="color:grey;">Grey</span>: Another similar* Bond but not traded by RD.</p>	
+
+      <br><br><br>
+      
+      <div id="diag-7"></div>
+
+<!-- *** tab 4 *** -->	
+	
+	</div>
+
+	<div id="tabs-5">
+	
+<!-- *** tab 5 *** -->
+
+      <br><br><br>
+      
+      <div id="diag-8"></div>
+
+<!-- *** tab 5 *** -->	
+	
+	</div>
+
+ 	
+	<div id="tabs-6">
+	
+<!-- *** tab 6 *** -->	
 	
   <button class="pure-button button-three" type="button" onclick="clearScreen(['table-1']);">Clear screen</button>
   <button class="pure-button button-two" type="button" onclick="sortBonds();">Bonds</button>
@@ -309,26 +203,14 @@
   
   <div id="diag-1"></div>
 
-<!-- *** tab 1 *** -->	
+<!-- *** tab 6 *** -->	
 	
 	</div>
 	
-	<div id="tabs-3">
-	
-<!-- *** tab 3 *** -->	
 
-  <div id="table-3"></div>
-  
-  <div id="diag-3"></div>
+	<div id="tabs-7">
 	
-
-<!-- *** tab 3 *** -->	
-	
-	</div>
-
-	<div id="tabs-4">
-	
-<!-- *** tab 4 *** -->	
+<!-- *** tab 7 *** -->	
   
       <div class="warning" id="warning"></div>
 
@@ -346,11 +228,39 @@
       <p>"Similar" Bonds are found by comparing: currency denomination, expiry year, fixed/floating coupon, coupon rate (if fixed), if callable.</p>
 
       <p>DK0009292559 is currently renamed to DK0009292599</p>
+
+      <p>"Settings": All chosen Settings will be stored in a later version such that the system permanently remembers the specific settings set per user.</p>
 	
 
-<!-- *** tab 4 *** -->	
+<!-- *** tab 7 *** -->	
 	
 	</div>
+
+	<div id="tabs-8">
+	
+<!-- *** tab 8 *** -->	
+
+    <!-- Issuer selectors -->
+	<form class="pure-form pure-form-stacked">
+		<fieldset>
+		    <legend>Diagram size</legend>
+			<div class="pure-g">
+				<div class="pure-u-1">
+					<label for="diagram-size">Diagram</label>
+					<select id="diagram-size">
+						<option value="small" >Small (480 x 300)</option>
+						<option value="medium" selected>Medium (720 x 450)</option>
+						<option value="large">Large (960 x 600)</option>
+					</select>
+				</div>
+			</div>
+		</fieldset>
+	</form>  
+
+<!-- *** tab 8 *** -->	
+	
+	</div>
+
 
   </div>
 

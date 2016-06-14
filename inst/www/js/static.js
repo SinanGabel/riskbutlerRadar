@@ -19,8 +19,34 @@ data_all = [],  // all transactions data per ISIN & date
 
 isin_all = {},  // all {isin:names, ...} in transactions data
 
-daysofweek = {0: "Sunday", 1: "Monday", 2: "Tuesday", 3: "Wednesday", 4: "Thursday", 5: "Friday", 6: "Saturday" };
+daysofweek = {0: "Sunday", 1: "Monday", 2: "Tuesday", 3: "Wednesday", 4: "Thursday", 5: "Friday", 6: "Saturday" },
 
+r_width = 480,
+r_height = 300;
+
+
+//...
+function diagramSize(size) {
+
+    var size = size || document.getElementById("diagram-size").value;
+
+	switch (size) {
+	  case "small":
+		r_width = 480,
+		r_height = 300;
+		break;
+	  case "medium":
+		r_width = 720,
+		r_height = 450;
+		break;
+	  case "large":
+		r_width = 960,
+		r_height = 600;
+		break;
+	  default:
+		console.log('default width and height');
+	}
+}
 
 
 /*
@@ -32,6 +58,78 @@ daysofweek = {0: "Sunday", 1: "Monday", 2: "Tuesday", 3: "Wednesday", 4: "Thursd
 
 */
 var static_codes = [
+ {
+isin: "DK0009297350",
+name: "2RDSD27SOA47",
+name2: "2RDSD27SOA47",
+issuer: "Realkredit Danmark A/S",
+issuer_short: "RD",
+coupon: 2,
+coupon_fixed: true,
+coupon_date: null,
+listing: "2014-06-20",
+expiry: "2047-10-01",
+base: "DKK",
+bond_type:	"SDRO",
+loan_type:	"Annuity loan with partial amortization",
+repayment_spec: "Optional repayment",
+repayment_profile:	"Annuity loan",
+callable: true },
+
+ {
+isin: "DK0009296030",
+name: "1RD10F22JARF",
+name2: "1RD10F22JARF",
+issuer: "Realkredit Danmark A/S",
+issuer_short: "RD",
+coupon: 1,
+coupon_fixed: true,
+coupon_date: null,
+listing: "2015-01-02",
+expiry: "2022-01-01",
+base: "DKK",
+bond_type:	"SDRO",
+loan_type:	"Bullet loan",
+repayment_spec: "Normal",
+repayment_profile:	"Bullet loan",
+callable: false },
+
+ {
+isin: "DK0009292476",
+name: "3RDSDRO27SOA47",
+name2: "3RDSDRO27SOA47",
+issuer: "Realkredit Danmark A/S",
+issuer_short: "RD",
+coupon: 3,
+coupon_fixed: true,
+coupon_date: null,
+listing: "2014-06-20",
+expiry: "2047-10-01",
+base: "DKK",
+bond_type:	"SDRO",
+loan_type:	"Annuity loan with partial amortization",
+repayment_spec: "Optional repayment",
+repayment_profile:	"Annuity loan",
+callable: true },
+
+ {
+isin: "DK0009277089",
+name: "4% REALKREDIT DANMARK 10S SDRO 2",
+name2: "4RD10S 18",
+issuer: "Realkredit Danmark A/S",
+issuer_short: "RD",
+coupon: 4,
+coupon_fixed: true,
+coupon_date: null,
+listing: "2007-07-13",
+expiry: "2018-01-01",
+base: "DKK",
+bond_type:	"SDRO",
+loan_type:	"Bullet loan",
+repayment_spec: "Normal",
+repayment_profile:	"Bullet loan",
+callable: false },
+
  {
 isin: "LU1153685679",
 name: "1RD10G19JARF",
