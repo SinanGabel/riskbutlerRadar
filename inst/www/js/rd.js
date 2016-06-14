@@ -146,7 +146,7 @@ function getToFrom() {
 // --- other ---
 
 /*
- . 
+ . See also: http://charts.animateddata.co.uk/uktemp/
  
 */
 function mgDiagram(id, type, data, isin, baseln) {
@@ -167,6 +167,8 @@ function mgDiagram(id, type, data, isin, baseln) {
 		  target: document.getElementById(id),
 		  x_accessor: "Time",
 		  y_accessor: ["Price"],
+		  
+          baselines: baseln,
 
           x_mouseover: function(d) {return d.Time + "  "; },
           y_mouseover: function(d) {return ((d.ISIN === isin) ? "" : (" " + d.Name + " " + d.ISIN)) + " P:" + d.Price + " B: " + d.buyer + " S: " + d.seller + " Diff: " + (d.diff).toFixed(2); },
@@ -180,12 +182,15 @@ function mgDiagram(id, type, data, isin, baseln) {
 		  linked: true };
   
     // ...
-    if (type === "point" && data.length > 20 ) {
+    if (type === "line") {
+    
+        json.area = false;
+    
+    } else if (type === "point" && data.length > 20 ) {
 
         json.least_squares = true;
-    }
-
-    if (type === "point-size") {
+    
+    } else if (type === "point-size") {
   
       json.title = stic.name2 + " Price & Volume";
       json.description = stic.name + " " + isin + " price & volume development";
@@ -198,11 +203,11 @@ function mgDiagram(id, type, data, isin, baseln) {
 
     }
 
+    // ...
     if (type === "point-group" || type === "point-size") {
 
       // ...
       json.chart_type = "point";
-      json.baselines = baseln;
 
       addColorAccessor(data, isin);  
       
@@ -871,48 +876,64 @@ function showTrades() {
     j = 0;
     isins.forEach(function(d) {
     
-        var data = [],
+        var data1 = [], data2 = [],
             el,
             mean = 0;
                    
         // ...
-        data = getBondGroupData(d);
-        
-        // ...
-        mean = _.findWhere(data, {ISIN: d}).mean;
-        
-        // ...
-        data = _.flatten(_.pluck(data,"data"));
+        data1 = getBondGroupData(d);
 
-        // ...
+        // Only ISIN code
+        data2 = _.findWhere(data1, {ISIN: d});
+        mean = data2.mean;
+        data2 = data2.data;
+        
+        // Also Peer Bonds
+        data1 = _.flatten(_.pluck(data1,"data"));
+
+        // Line
+        j++;
+        el = document.createElement("div");
+        el.setAttribute("id", "diag-7" + j);
+        div7.appendChild(el);
+
+        mgDiagram("diag-7" + j, "line", data2, d, [{label: "mean", value: mean }]);
+
+        
+        // Point with peer Bonds
         j++;
         el = document.createElement("div");
         el.setAttribute("id", "diag-7" + j);
         div7.appendChild(el);
                 
         // making a copy of data so that data does not change while drawing
-        mgDiagram("diag-7" + j, "point-group", data, d, [{label: "mean", value: mean }]);
+        mgDiagram("diag-7" + j, "point-group", data1, d, [{label: "mean", value: mean }]);
 
-        // ...
+
+        // Point with Volume diameters
         j++;
         el = document.createElement("div");
         el.setAttribute("id", "diag-7" + j);
         div7.appendChild(el);
-        
-        // ...
-        data = _.findWhere(data_all, {ISIN: d}).data;
-                
+                        
         // making a copy of data so that data does not change while drawing
-        mgDiagram("diag-7" + j, "point-size", data, d, [{label: "mean", value: mean }]);
+        mgDiagram("diag-7" + j, "point-size", data2, d, [{label: "mean", value: mean }]);
 
-        // ...
+        // Separator: <HR>
+        el = document.createElement("hr");
+        el.setAttribute("style", "background-color:rgb(200,0,0);height:5px;");
+        div7.appendChild(el);
+        div7.appendChild(document.createElement("br"));
+        div7.appendChild(document.createElement("br"));
+
+        // Histogram
+        j++;
         el = document.createElement("div");
         el.setAttribute("id", "diag-8" + j);
         div8.appendChild(el);
         
         // ...
-        //mgHistogram("diag-8" + j, (_.pluck(data, "Price")).concat([mean]), d, "Price", [{label: "mean", value: mean }]);	
-        mgHistogram("diag-8" + j, _.pluck(data, "Price"), d, "Price");	
+        mgHistogram("diag-8" + j, _.pluck(data2, "Price"), d, "Price");	
         
     });	
 }
