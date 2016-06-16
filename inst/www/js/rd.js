@@ -2,6 +2,130 @@
 
 
 /*
+ . returns an array of indexes of arr where search string txt matches the first part of every character string within txt
+ 
+ . Note: this is a general function
+*/
+function searchTxt(arr, txt) {
+    
+    var txt_ar = [], pat = [], ar = [], f = [],
+        l_p = 0, l = 0, i = 0;
+        
+    // ...
+    l = arr.length;  
+      
+	if (txt.length > 0 && txt.trim() !== "") {
+  
+		  // ("   novo    nordisk  aa bbb ").replace(/\s+/g, " ").trim().split(" ")  -> ["novo", "nordisk", "aa", "bbb"]
+		  txt_ar = (txt).replace(/\s+/g, " ").trim().split(" ");
+
+		  pat = _.map(txt_ar, function(d) {return new RegExp("\\b" + d, "i"); });
+
+		  l_p = pat.length;
+		
+		  for (i = 0; i < l; i++) {
+	  
+			  // new
+			  f = _.filter(pat, function(d) {return d.test(arr[i]) === true});
+					  
+			  // check that all sub strings return true in f
+			  if (f.length === l_p) {ar.push(i); }
+		  }
+	  
+	} else {
+	  
+		  // show all or a subset of all available codes
+		  ar = _.range(0, l);
+	}
+	  
+	return ar;
+}
+
+
+/*
+
+. ...
+
+*/
+function searchSymbol(txt) {
+
+    txt = txt || document.getElementById("input-symbol-search").value;
+    
+    var ar = [];
+    
+    static_codes_str_sub = _.map(static_codes, function(d) {return (_.values(_.pick(d, ["isin", "name", "issuer", "issuer_short", "coupon", "expiry", "base", "bond_type", "loan_type", "repayment_spec", "repayment_profile"]))).join(" - "); });
+    
+    ar = searchTxt(static_codes_str_sub, txt);
+	  
+	document.getElementById("display-symbol-search").innerHTML = 
+	
+	"<p>Click to select Bond(s)</p><br>" +
+	
+	_.map(ar, function(d) {
+	    
+	    var t = static_codes_str_sub[d],
+            i = t.substr(0,12).toUpperCase(),
+            markup = (list_selected_symbols.indexOf(i) === -1) ? "pure-button" : "pure-button button-three"; 
+	    
+	    return '<button class=\'' + markup + '\' id=\'' + i + '\' onclick="selectSymbol(\'' +  t + '\')">' + t + '</button><br>'; 
+	
+	}).join(" ");
+}
+
+
+/*
+
+
+/*
+ . ...
+*/
+function selectSymbol(i) {
+
+    var div, el,
+        isin = "";
+    
+    //
+    isin = i.substr(0,12).toUpperCase();
+
+    if (list_selected_symbols.indexOf(isin) !== -1) {return; }
+
+    //
+    list_selected_symbols.push(isin);
+    
+    //
+    document.getElementById(isin).className = "pure-button button-three";
+    
+    //
+    div = document.getElementById("symbols-selected");
+    
+    el = document.createElement("button");
+    el.textContent = "Remove: " + i;
+    el.setAttribute("class", "pure-button");
+    el.setAttribute('onclick', 'this.parentNode.removeChild(this);list_selected_symbols=_.without(list_selected_symbols,\'' + isin + '\');if(document.getElementById("display-symbol-search").textContent!==""){document.getElementById(\'' + isin + '\').className = "pure-button";}');
+    
+    div.appendChild(el);    
+}
+
+
+/*
+ . ...
+*/
+function buildSymbolList(d) {
+
+        var ar = [],
+            markup = "";
+        
+        ar = _.map(d, function(d) {return "<option value='" + d.ISIN + "'>" + d.Name + "&nbsp;&nbsp;" + d.ISIN + "</option>"; });
+        markup = "<option value='all'>All</option>" + ar.join("");
+        
+        document.getElementById("isin1").innerHTML = markup;
+        document.getElementById("isin2").innerHTML = markup;
+
+
+}
+
+
+/*
   . id: DOM id
   . m: matrix
   . ToDo: possibility to format numbers
@@ -557,19 +681,10 @@ function uxInit() {
 
     // ISIN codes
 	sqliteSQL({"url": "/home/ubuntu/sql/rd1.db", "stmt": "SELECT DISTINCT ISIN, Name FROM rd ORDER BY Name"}, function(d) {
-
-        var ar = [],
-            markup = "";
-        
-        ar = _.map(d, function(d) {return "<option value='" + d.ISIN + "'>" + d.Name + "&nbsp;&nbsp;" + d.ISIN + "</option>"; });
-        markup = "<option value='all'>All</option>" + ar.join("");
-        
-        document.getElementById("isin1").innerHTML = markup;
-        document.getElementById("isin2").innerHTML = markup;
         
         // global var
         isin_all = _.object(_.map(d, function(d) {return [d.ISIN, d.Name]; }));
-                
+        
         // 
         checkStaticData();
         
@@ -964,6 +1079,9 @@ function go() {
   
         j = (dates.length === 1) ? 0 : 1 ;
     }
+    
+    // ISIN
+    stmt = (_.isEmpty(list_selected_symbols)) ? "" : ("ISIN IN (" + _.map(list_selected_symbols, function(d) {return '\'' + d + '\'';}).join(", ") + ") AND ") ;
       
     // Get new data
     stmt = "SELECT * FROM rd WHERE " + stmt + " Time BETWEEN '" + dates[0] + "' AND date('" + dates[j] + "', '+1 days') ORDER BY Time ASC, ISIN ASC";

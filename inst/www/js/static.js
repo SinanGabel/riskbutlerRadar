@@ -10,6 +10,8 @@
 */
 ocpu.seturl("https://riskbutler.net/ocpu/github/sinangabel/radar/R");
 
+//ocpu.seturl("http://185.34.136.163/ocpu/github/sinangabel/radar/R");
+
 
 // --- global vars ---
 
@@ -18,6 +20,12 @@ var
 data_all = [],  // all transactions data per ISIN & date
 
 isin_all = {},  // all {isin:names, ...} in transactions data
+
+static_codes = [],
+static_codes_str = [], 
+static_codes_str_sub = [],
+
+list_selected_symbols = [],
 
 daysofweek = {0: "Sunday", 1: "Monday", 2: "Tuesday", 3: "Wednesday", 4: "Thursday", 5: "Friday", 6: "Saturday" },
 
@@ -57,7 +65,7 @@ function diagramSize(size) {
  . 16 ISIN codes
 
 */
-var static_codes = [
+static_codes = [
 
  {
 isin: "DK0002018209",
@@ -493,3 +501,5 @@ repayment_profile:	"Annuity loan",
 callable: true }
 
 ];
+
+                
