@@ -17,6 +17,9 @@
 
 var 
 
+sql_data = {},  // object to keep data already fetched => save to local storage later
+//sql_last_key = "",
+
 data_all = [],  // all transactions data per ISIN & date
 
 isin_all = {},  // all {isin:names, ...} in transactions data

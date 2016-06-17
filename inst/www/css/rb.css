@@ -219,6 +219,10 @@ a:hover {
    color: #e91e63;
 }
 
+.info {
+    color: red;
+}
+
 
 /* This is the class used for the footer */
 .footer {
@@ -344,6 +348,11 @@ line-height : 1em;
   height: 11px;
   margin-bottom: 15px;
 }
+
+
+.sortable { list-style-type: none; padding: 0; width: 15em; }
+
+.sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 0.8em; height: auto; }
 
 
 

@@ -314,6 +314,21 @@ function rangeC(c, n) {
 
 // --- ui.js ---
 
+/* 
+ . note: remember to declare id's globally, and to call clearTimeout() each time message is called
+ . ...
+*/ 
+function message(id, txt, t) {
+    t = t || 10000;
+            
+    // set message text 
+    document.getElementById(id).textContent = txt;
+    
+    // remove text after time t
+    setTimeout( function() { document.getElementById( id).textContent = "";}, t);  // note the need to wrap in a function()
+}
+
+
 /*
  . tekst("big-diagram", "p", "this is some text ...")
  

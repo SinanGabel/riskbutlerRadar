@@ -153,7 +153,6 @@
 	</form>
 	<br>
 	
-	<div class="info" id="search-text"></div>
 	<span id="display-symbol-search"></span>
 
 
@@ -167,9 +166,10 @@
 
 
   <br><br>
+	<div class="info" id="search-text"></div>
 
-  <button class="pure-button button-three" type="button" onclick="clearScreen(['table-3','table-6','diag-7', 'diag-8']);">Clear screens</button>
-  <button class="pure-button button-two" type="button" onclick="go();">Go</button>
+  <button class="pure-button button-three" type="button" onclick="clearScreen(['table-2','table-3','diag-4', 'diag-8']);">Clear screens</button>
+  <button class="pure-button button-two" type="button" onclick="clearScreen(['table-2','table-3','diag-4', 'diag-8']);go();">Go</button>
 
 
 <!-- *** tab 1 *** -->	
@@ -178,12 +178,17 @@
 
 	<div id="tabs-2">
 	
-<!-- *** tab 2 *** -->	
+<!-- *** tab 2 *** -->
+	  <div class="pure-g pure-u-1-3"">
+		<ul id="sort-2" class="sortable">
+		  <li class="ui-state-default" data-item="date">Date</li>
+		  <li class="ui-state-default" data-item="diff">Diff</li>
+		  <li class="ui-state-default" data-item="isin">Name / ISIN</li>
+		</ul>
+	  </div>
 
-      <div id="table-3"></div>
+      <div id="table-2"></div>
   
-      <div id="diag-3"></div>
-
 <!-- *** tab 2 *** -->	
 	
 	</div>
@@ -193,7 +198,17 @@
 	
 <!-- *** tab 3 *** -->	
 
-      <div id="table-6"></div>
+	  <div class="pure-g pure-u-1-3"">
+		<ul id="sort-3" class="sortable">
+		  <li class="ui-state-default" data-item="tid">Time</li>
+		  <li class="ui-state-default" data-item="isin">Name / ISIN</li>
+		  <li class="ui-state-default" data-item="diff">Diff</li>
+		  <li class="ui-state-default" data-item="buyer">Buyer</li>
+		  <li class="ui-state-default" data-item="seller">Seller</li>
+		</ul>
+	  </div>
+
+      <div id="table-3"></div>
 
 <!-- *** tab 3 *** -->	
 	
@@ -207,7 +222,7 @@
 
       <br><br><br>
       
-      <div id="diag-7"></div>
+      <div id="diag-4"></div>
 
 <!-- *** tab 4 *** -->	
 	
@@ -231,7 +246,7 @@
 <!-- *** tab 6 *** -->	
 	
   <button class="pure-button button-three" type="button" onclick="clearScreen(['table-1']);">Clear screen</button>
-  <button class="pure-button button-two" type="button" onclick="sortBonds();">Bonds</button>
+  <button class="pure-button button-two" type="button" onclick="clearScreen(['table-1']);sortBonds();">Bonds</button>
 
   <br><br><hr>
 
@@ -266,7 +281,28 @@
       <p>DK0009292559 is currently renamed to DK0009292599</p>
 
       <p>"Settings": All chosen Settings will be stored in a later version such that the system permanently remembers the specific settings set per user.</p>
-	
+      
+
+      
+      <h3>Search feature</h3>
+      
+      <p>You may type one or more words e.g.: "2047" or "2047 RD" or "Annuity 2047".</p>
+
+      <p>You may use lower or upper case letters, it is not case sensitive i.e. "2047 RD" and "2047 rd" is the same.</p>
+
+      <p>The order of the words does not matter i.e. "2032 NYK" and "NYK 2032" is the same.</p>
+
+      <p>It is the beginning of each word that matters for the search i.e. you may search for "DK0009299133" but not "9299133". However you can search for part of a word as long as it from the beginning of the word i.e. "DK00092" will work.</p>
+
+      <p>If you want comparisons of two or more Bonds then these need to be included in the Bond universe, and they also need to be "similar" as described above in the Notes. As an example you can try with these two Bonds "DK0002032978" and "DK0009297350".</p>
+
+
+      <h3>Sort feature</h3>
+      
+      <p>Reorder elements in the list using the mouse.</p>
+      <p>Click on and drag an element to a new spot within the list, and the other items will adjust to fit.</p>
+
+
 
 <!-- *** tab 7 *** -->	
 	
@@ -279,14 +315,14 @@
     <!-- Issuer selectors -->
 	<form class="pure-form pure-form-stacked">
 		<fieldset>
-		    <legend>Diagram size</legend>
+		    <legend>Points diagram size</legend>
 			<div class="pure-g">
 				<div class="pure-u-1">
 					<label for="diagram-size">Diagram</label>
 					<select id="diagram-size">
 						<option value="small" >Small (480 x 300)</option>
-						<option value="medium">Medium (720 x 450)</option>
-						<option value="large" selected>Large (960 x 600)</option>
+						<option value="medium" selected>Medium (720 x 450)</option>
+						<option value="large">Large (960 x 600)</option>
 					</select>
 				</div>
 			</div>
@@ -326,14 +362,20 @@ PRODUCTION: ENABLE TO HERE -->
 <script src="js/ext/math.min.js"></script>
 <script src="js/ext/numeric.min.js"></script>
 
-<!-- Download by selecting datepicker, tabs, tooltips, popover add-on AND use Theme: Blitzer -->
+<!-- Download by selecting datepicker, tabs, tooltips, [popover], sortable, dragable add-on AND use Theme: Blitzer -->
 <script src="js/ext/jquery-ui.min.js"></script>
 
 <script>
-$( "#tabs" ).tabs();
 
-$(function() {$( "#date-from" ).datepicker({dateFormat: "yy-mm-dd"}); });
-$(function() {$( "#date-to" ).datepicker({dateFormat: "yy-mm-dd"}); });
+$(function() {  $( "#tabs" ).tabs(); });
+
+$(function() {   $( "#date-from" ).datepicker({dateFormat: "yy-mm-dd"}); });
+  
+$(function() {   $( "#date-to" ).datepicker({dateFormat: "yy-mm-dd"}); });
+  
+$(function() {   $( "#sort-2" ).sortable({stop: function() {tableStatistics("table-2", sortTable("sort-2", data_all)); }});  $( "#sort-2" ).disableSelection(); });
+$(function() {   $( "#sort-3" ).sortable({stop: function() {tableTrades("table-3", sortTable("sort-3", data_all, true)); }});  $( "#sort-3" ).disableSelection(); });
+
 </script>
 
 <script src="js/static.js"></script>
