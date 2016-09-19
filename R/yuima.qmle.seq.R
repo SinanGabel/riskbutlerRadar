@@ -4,7 +4,7 @@
 #'
 #' @param data  list(x=data) or list(x1=data1, x2=data2,...) possibly use log or return of data.
 #' @param delta  1 divided by the # of observations per year e.g. with business daily data typically: 1/252
-#' @param summary TRUE or FALSE [default is FALSE: not used yet]
+#' @param summary TRUE or FALSE: TRUE
 #' @param drift  "mu * x" or c("mu1 * x2",...)
 #' @param diffusion  "sigma * x" or matrix(c("sigma1","0","0","sigma2"),2,2)
 #' @param hurst 0.5
@@ -24,10 +24,12 @@ yuima.qmle.seq <- function(data, delta = 1/252, summary = TRUE, drift, diffusion
   # check foreach further: even, uneven indexes; vector or matrix etc.
   w <- 100
   step <- 10
+  n <- length(data)
+  l <- seq(1, n - w + step, step)
   est = start
-  # %dopar% or %do%
+  # parallel %dopar% or %do%
   #r <- foreach::foreach(i=l, .combine = cbind, .packages="foreach") %do% {
-  r <- foreach::foreach(i = seq(1, length(data) - w + step, step), .combine = cbind) %do% {
+  r <- foreach::foreach(i = l, .combine = cbind) %do% {
 
       dat <- data[seq(i, i+w-1)]
       dat <- yuima::setData(dat, delta = delta)
@@ -38,7 +40,11 @@ yuima.qmle.seq <- function(data, delta = 1/252, summary = TRUE, drift, diffusion
       est <- as.list(res@coef)
       res@coef
   }
-  return(r)
+
+  if (summary == TRUE)
+    return(jsonlite::toJSON(list( call = list(seq = l, w = w, step = step, n = n), coef = as.data.frame(t(r)))))
+  else
+    return(r)
 }
 
 # library(radar)

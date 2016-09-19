@@ -12,7 +12,7 @@ yuima.qmle(data, delta = 1/252, summary = TRUE, drift, diffusion,
 
 \item{delta}{1 divided by the # of observations per year e.g. with business daily data typically: 1/252}
 
-\item{summary}{TRUE or FALSE [FALSE]}
+\item{summary}{TRUE or FALSE: TRUE}
 
 \item{drift}{"mu * x" or c("mu1 * x1",...)}
 

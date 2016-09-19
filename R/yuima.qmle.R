@@ -4,7 +4,7 @@
 #'
 #' @param data  list(x=data) or list(x1=data1, x2=data2,...) possibly use log or return of data.
 #' @param delta  1 divided by the # of observations per year e.g. with business daily data typically: 1/252
-#' @param summary TRUE or FALSE [FALSE]
+#' @param summary TRUE or FALSE: TRUE
 #' @param drift  "mu * x" or c("mu1 * x1",...)
 #' @param diffusion  "sigma * x" or matrix(c("sigma1","0","0","sigma2"),2,2)
 #' @param hurst 0.5
