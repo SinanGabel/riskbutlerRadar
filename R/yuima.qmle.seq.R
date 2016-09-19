@@ -26,7 +26,8 @@ yuima.qmle.seq <- function(data, delta = 1/252, summary = TRUE, drift, diffusion
   l <- seq(1, length(data) - w + step, step)
   est = start
   # %dopar% or %do%
-  r <- foreach(i=l, .combine = cbind) %do% {
+  #r <- foreach(i=l, .combine = cbind, .packages="foreach") %do% {
+  r <- foreach::foreach(i=l, .combine = cbind) %do% {
 
       dat <- data[seq(i,i+w-1)]
       dat <- yuima::setData(dat, delta = delta)
