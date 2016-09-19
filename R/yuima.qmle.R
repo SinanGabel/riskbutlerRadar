@@ -29,8 +29,11 @@ yuima.qmle <- function(data, delta = 1/252, summary = TRUE, drift, diffusion, hu
   res <- yuima::qmle(yobj, start, ...)
 
   # To use estimates as start values in next or other qmle estimation set: start = as.list(res@coef)
-  if (summary == TRUE)
-    return(mlefilter(res))
+  if (summary == TRUE) {
+    res <- stats4::summary(res)
+    list( m2logL = res@m2logL, coef = as.data.frame(res@coef), call = toString(res@call))
+  }
+  #return(mlefilter(res))
   else
     return(res)
 }

@@ -42,7 +42,8 @@ yuima.qmle.seq <- function(data, delta = 1/252, summary = TRUE, drift, diffusion
   }
 
   if (summary == TRUE)
-    return(jsonlite::toJSON(list( call = list(seq = l, w = w, step = step, n = n), coef = as.data.frame(t(r)))))
+    #return(jsonlite::toJSON(list( call = list(seq = l, w = w, step = step, n = n), coef = as.data.frame(t(r)))))
+    return(list( call = list(seq = l, w = w, step = step, n = n), coef = as.data.frame(t(r))))
   else
     return(r)
 }
