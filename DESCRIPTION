@@ -8,6 +8,16 @@ Maintainer: Who to complain to <sinan.gabel@gmail.com>
 Description: Utility functions for riskbutler.com
 License: Innova Financial Solutions ApS legal terms (http://ifs.dk/en/legal/)
 LazyData: TRUE
-Imports: RSQLite, yuima, stats4, jsonlite, foreach, sde
-Depends: R (>= 3.2.2), DBI
-Suggests: testthat
+Imports:
+    RSQLite,
+    yuima,
+    stats4,
+    jsonlite,
+    foreach,
+    sde,
+    DBI
+Depends:
+    R (>= 3.2.2)
+Suggests:
+    testthat
+RoxygenNote: 5.0.1

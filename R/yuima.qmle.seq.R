@@ -15,6 +15,7 @@
 #' @param upper  [optional] list(mu = 0.50, sigma = 1)
 #' @return maximum likelihood estimation
 #' @export
+#' @importFrom foreach %do%
 #'
 yuima.qmle.seq <- function(data, delta = 1/252, summary = TRUE, drift, diffusion, hurst = 0.5, solve.variable = "x", start, ...) {
 
@@ -23,13 +24,12 @@ yuima.qmle.seq <- function(data, delta = 1/252, summary = TRUE, drift, diffusion
   # check foreach further: even, uneven indexes; vector or matrix etc.
   w <- 100
   step <- 10
-  l <- seq(1, length(data) - w + step, step)
   est = start
   # %dopar% or %do%
-  #r <- foreach(i=l, .combine = cbind, .packages="foreach") %do% {
-  r <- foreach::foreach(i=l, .combine = cbind) %do% {
+  #r <- foreach::foreach(i=l, .combine = cbind, .packages="foreach") %do% {
+  r <- foreach::foreach(i = seq(1, length(data) - w + step, step), .combine = cbind) %do% {
 
-      dat <- data[seq(i,i+w-1)]
+      dat <- data[seq(i, i+w-1)]
       dat <- yuima::setData(dat, delta = delta)
       yobj <- yuima::setYuima(model = ymod, data = dat)
       res <- yuima::qmle(yobj, start = est, ...)
