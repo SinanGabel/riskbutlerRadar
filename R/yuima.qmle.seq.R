@@ -21,11 +21,25 @@ yuima.qmle.seq <- function(data, delta = 1/252, summary = TRUE, drift, diffusion
 
   ymod <- yuima::setModel(drift = drift, diffusion = diffusion, hurst = hurst, solve.variable = solve.variable, state.variable = solve.variable)
 
+  #
+  sekvens <- function(n, w, step) {
+	  l <- seq(1, n - w + step, step)
+  
+	  if ((l[length(l)] + w - 1) > n ) {
+		l[length(l)] = n - w + 1
+	  }
+
+	  return(l)
+  }
+
   # check foreach further: even, uneven indexes; vector or matrix etc.
   w <- 100
   step <- 10
   n <- length(data)
-  l <- seq(1, n - w + step, step)
+
+  #l <- seq(1, n - w + step, step)
+  l <- sekvens(n, w, step)
+
   est = start
   # parallel %dopar% or %do%
   #r <- foreach::foreach(i=l, .combine = cbind, .packages="foreach") %do% {
