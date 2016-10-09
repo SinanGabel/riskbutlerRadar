@@ -4,6 +4,8 @@
 #'
 #' @param data  list(x=data) or list(x1=data1, x2=data2,...) possibly use log or return of data.
 #' @param delta  1 divided by the # of observations per year e.g. with business daily data typically: 1/252
+#' @param window 100
+#' @param step 10
 #' @param summary TRUE or FALSE: TRUE
 #' @param drift  "mu * x" or c("mu1 * x2",...)
 #' @param diffusion  "sigma * x" or matrix(c("sigma1","0","0","sigma2"),2,2)
@@ -17,14 +19,14 @@
 #' @export
 #' @importFrom foreach %do%
 #'
-yuima.qmle.seq <- function(data, delta = 1/252, summary = TRUE, drift, diffusion, hurst = 0.5, solve.variable = "x", start, ...) {
+yuima.qmle.seq <- function(data, window = 100, step = 10, delta = 1/252, summary = TRUE, drift, diffusion, hurst = 0.5, solve.variable = "x", start, ...) {
 
   ymod <- yuima::setModel(drift = drift, diffusion = diffusion, hurst = hurst, solve.variable = solve.variable, state.variable = solve.variable)
 
   #
-  sekvens <- function(n, w, step) {
-	  l <- seq(1, n - w + step, step)
-  
+  sekvens <- function(n, w, s) {
+	  l <- seq(1, n - w + s, s)
+
 	  if ((l[length(l)] + w - 1) > n ) {
 		l[length(l)] = n - w + 1
 	  }
@@ -33,8 +35,8 @@ yuima.qmle.seq <- function(data, delta = 1/252, summary = TRUE, drift, diffusion
   }
 
   # check foreach further: even, uneven indexes; vector or matrix etc.
-  w <- 100
-  step <- 10
+  w <- window
+  #step <- 10
   n <- length(data)
 
   #l <- seq(1, n - w + step, step)

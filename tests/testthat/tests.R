@@ -70,6 +70,12 @@ test_that("yuima.qmle.seq", {
   expect_true( abs(mean(est[1,]) - 0.06801815) < 1e-3)
   expect_true( abs(mean(est[2,]) - 0.1201217) < 1e-3)
 
+  # estimate sequence of windows of length=100 (default) and steps=10 (default)
+  est <- yuima.qmle.seq(data = X, window = 125, step = 5, delta = 1/500, summary = FALSE, drift = "mu * x", diffusion = "sigma * x", hurst = 0.5, solve.variable = "x", method="L-BFGS-B", start = list(mu = 0.15, sigma = 0.15), lower = list(mu = -0.5, sigma = 0), upper = list(mu = 0.5, sigma = 1))
+
+  expect_true( abs(mean(est[1,]) - 0.06822156) < 1e-3)
+  expect_true( abs(mean(est[2,]) - 0.1199579) < 1e-3)
+
 })
 
 
