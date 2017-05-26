@@ -1,2 +1,2 @@
-# radar
-Radar - a library for R based code a.o.
+# riskbutlerRadar
+riskbutlerRadar - a small utility library for R based code in RiskButler.com software.
