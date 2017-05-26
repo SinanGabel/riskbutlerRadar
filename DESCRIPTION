@@ -1,8 +1,8 @@
-Package: radar
+Package: riskbutlerRadar
 Type: Package
 Title: Utility functions for riskbutler.com
-Version: 0.3
-Date: 2016-09-19
+Version: 0.5
+Date: 2017-05-26
 Author: Sinan Gabel
 Maintainer: Who to complain to <sinan.gabel@gmail.com>
 Description: Utility functions for riskbutler.com

@@ -16,9 +16,9 @@ library(yuima)
 library(DBI)
 library(RSQLite)
 library(foreach)
-library(radar)
+library(riskbutlerRadar)
 
-context("radar tests")
+context("riskbutlerRadar tests")
 
 test_that("yuima.qmle", {
 
