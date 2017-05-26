@@ -18,7 +18,7 @@
 #'
 yuima.simulate <- function(setseed = FALSE, sumsim = TRUE, nsim = 1, drift, diffusion, hurst = 0.5, solve.variable = "x", xinit = 1, Terminal = 1, n = 100, parameter, grid = NULL) {
 
-  ymod <- yuima::setModel(drift = drift, diffusion = diffusion, hurst = hurst, solve.variable = solve.variable, state.variable = solve.variable)
+  ymod <- yuima::setModel(drift = drift, diffusion = diffusion, hurst = hurst, solve.variable = solve.variable, state.variable = solve.variable, xinit = xinit)
   ysam <- yuima::setSampling(Terminal = Terminal, n = n, grid = grid)
   yobj <- yuima::setYuima(model = ymod, sampling = ysam)
 
@@ -28,7 +28,7 @@ yuima.simulate <- function(setseed = FALSE, sumsim = TRUE, nsim = 1, drift, diff
       set.seed(123)
     }
 
-    s <- yuima::simulate(yobj, xinit = xinit, true.parameter = parameter)
+    s <- yuima::simulate(yobj, true.parameter = parameter)
     return(s@data@original.data[-1,])
 
   } else if (sumsim == TRUE) {
@@ -40,7 +40,7 @@ yuima.simulate <- function(setseed = FALSE, sumsim = TRUE, nsim = 1, drift, diff
           set.seed(123)
         }
 
-        s <- yuima::simulate(yobj, xinit = xinit, true.parameter = parameter)
+        s <- yuima::simulate(yobj, true.parameter = parameter)
         t <- s@data@original.data
         r <- r + t[-1,]
     }
@@ -55,7 +55,7 @@ yuima.simulate <- function(setseed = FALSE, sumsim = TRUE, nsim = 1, drift, diff
           set.seed(123)
         }
 
-        s <- yuima::simulate(yobj, xinit = xinit, true.parameter = parameter)
+        s <- yuima::simulate(yobj, true.parameter = parameter)
         t <- s@data@original.data
         r <- rbind(r,t[-1,], deparse.level = 0)
         #r <- cbind(r, t)

@@ -641,7 +641,7 @@ function uxInit() {
     day = (ar[ar.length -1]).substr(-10);
         
     // get data for the latest weekday
-	sqliteSQL({"url": "/home/ubuntu/sql/rd1.db", "stmt": "SELECT max(Time) FROM rd"}, function(d) {
+	sqliteSQL({"url": "/home/" + user + "/sql/rd1.db", "stmt": "SELECT max(Time) FROM rd"}, function(d) {
 	
 		var date = d[0]["max(Time)"];
 		
@@ -663,7 +663,7 @@ function uxInit() {
 	});
 
     // ISIN codes
-	sqliteSQL({"url": "/home/ubuntu/sql/rd1.db", "stmt": "SELECT DISTINCT ISIN, Name FROM rd ORDER BY Name"}, function(d) {
+	sqliteSQL({"url": "/home/" + user + "/sql/rd1.db", "stmt": "SELECT DISTINCT ISIN, Name FROM rd ORDER BY Name"}, function(d) {
         
         // global var
         isin_all = _.object(_.map(d, function(d) {return [d.ISIN, d.Name]; }));
@@ -1012,7 +1012,7 @@ function go() {
     
     if (_.keys(sql_data).indexOf(key) === -1) {
   
-		sqliteSQL({"url": "/home/ubuntu/sql/rd1.db", "stmt": stmt}, function(f) {
+		sqliteSQL({"url": "/home/" + user + "/sql/rd1.db", "stmt": stmt}, function(f) {
   
 			var txt = "", 
 				i = 1;
