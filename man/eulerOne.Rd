@@ -8,11 +8,11 @@ eulerOne(xinit = 1, Terminal = 1, nsim = 10, parameter = list(p1 =
   -0.04, p2 = 0.1, p3 = 0.23, p4 = 0.5))
 }
 \arguments{
-\item{xinit}{initial value vector of state variables (default 1)}
+\item{xinit}{initial value vector of state variables (default 1, number)}
 
-\item{Terminal}{(default 1 (year))}
+\item{Terminal}{(default 1 (year), positive number)}
 
-\item{nsim}{number of simulations (default 10)}
+\item{nsim}{number of simulations (default 10, integer)}
 
 \item{parameter}{named list of parameters}
 }
@@ -21,5 +21,6 @@ simulations
 }
 \description{
 It can be updated to take any kind of SDE model
+Simulates only at the (future) Terminal (trading time) point
 }
 

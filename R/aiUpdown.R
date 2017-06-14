@@ -1,0 +1,57 @@
+#' Forecast of chance of profit and risk of loss for api.ai (this) updown financial activity agent
+#'
+#' @param json_obj json webhook object from api.ai
+#' @return list
+#' @export
+#'
+aiUpdown <- function(json_obj = '{"result": {"parameters": {"activity_financial": "import", "amount-currency": {"amount": 100, "currency": "GBP"}, "base-currency": "DKK", "date": "2017-12-10"}}}') {
+
+
+  api <- jsonlite::fromJSON(json_obj, flatten = TRUE)
+
+  api <- api$result$parameters
+
+  # temporary
+  base_currency <- api$`base-currency`
+  currency <- api$`amount-currency`$currency
+
+  ## . Check if results are already calculated and stored, else make new simulations; check if result and all parameters are there and correct;
+
+  ## . Get market data
+  # tip: preload httr in opencpu
+  # tip: add date to fields to see actual data time stamps, and add verbose() to the POST parameters for more info on the call
+  # todo: filter weekend data out; check if a result is returned; test with lasso if model 3 is appropriate or perhaps a simpler model can be used e.g. where p4=1 <=> Brennan 92
+  xdata <- riskbutlerRadar::getData(request = list(class = "FX", base_currency = base_currency, currency = currency, frequency = "day", limit = 252))
+
+  ## . Estimate parameters
+  nsim <- 1000
+  sims <- riskbutlerRadar::simulate_all(xdata, T = 1/52, nsim = nsim, delta = 1/365)
+  xinit <- xdata[length(xdata)]
+
+  ## Make wanted statistics
+  sims <- sort(sims)
+  q <- 0.01
+  up <- (sims[round((1-q) * nsim)] - xinit)/xinit  # q * 100 percent chance of up = up, or more up
+  down <- (sims[round(q * nsim)] - xinit)/xinit    # q * 100 percent chance of down = down, or further down
+
+  ## Save results to db for next user
+  ## Return forecast info to api.ai
+
+  txt <- jsonlite::unbox(paste("The chance of profit is", format(up * 100, digits = 2), "percent, and the risk of loss is", format(down * 100, digits = 2), " percent of your", api$activity_financial, "activity amount. To understand how this was calculated please go to riskbutler.com."))
+
+  return(list(speech = txt, displayText = txt, source = jsonlite::unbox("riskbutler.net")))
+}
+
+
+#aiUpdown <- function(json_obj = '{"result": {"parameters": {"activity_financial": "import", "amount_currency": {"amount": 100, "currency": "GBP"}, "base_currency": "DKK", "date": "2017-12-10"}}}') {
+
+#' ptm <- proc.time()
+#' aiUpdown()
+#' proc.time() - ptm
+#'
+#'
+#' #' @param activity_financial export, import, trade or invest (default export, string)
+#' #' @param base_currency ISO currency (default EUR, string)
+#' #' @param amount activity amount (default 100, number)
+#' #' @param currency activity ISO currency (default USD, string)
+#' #' @param date activity date (default now + 7 calendar days, date format "2017-09-10")

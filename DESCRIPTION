@@ -2,7 +2,7 @@ Package: riskbutlerRadar
 Type: Package
 Title: Utility functions for riskbutler.com
 Version: 0.6
-Date: 2017-06-12
+Date: 2017-06-14
 Author: Sinan Gabel
 Maintainer: Who to complain to <sinan.gabel@gmail.com>
 Description: Utility functions for riskbutler.com
@@ -14,7 +14,7 @@ Imports:
     stats4,
     jsonlite,
     foreach,
-    sde,
+    httr,
     DBI
 Depends:
     R (>= 3.2.2)
