@@ -4,21 +4,23 @@
 \alias{simulate_all}
 \title{Estimates SDE parameters for a univariate time series, and simulates future values for this SDE}
 \usage{
-simulate_all(data, T = 1, nsim = 100, delta = 1/252)
+simulate_all(data, T = 1, nsim = 100, delta = 1/252, neg_values = FALSE)
 }
 \arguments{
 \item{data}{univariate time series of type numeric}
 
-\item{T}{risk time horizon in years}
+\item{T}{risk time horizon in years (default 1 year)}
 
-\item{nsim}{number of simulations at time T}
+\item{nsim}{number of simulations at time T (default 100)}
 
-\item{delta}{data unit distance}
+\item{delta}{data unit distance (default 1/252)}
+
+\item{neg_values}{in data, boolean (default FALSE)}
 }
 \value{
-json
+vector of double (numeric)
 }
 \description{
-Daily data for longer than 7 days risk time horizon, else hourly data (up to 7 days risk time horison)
+Estimates SDE parameters for a univariate time series, and simulates future values for this SDE
 }
 

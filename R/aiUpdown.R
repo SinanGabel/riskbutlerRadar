@@ -22,11 +22,18 @@ aiUpdown <- function(result, ...) {
   # tip: preload httr in opencpu
   # tip: add date to fields to see actual data time stamps, and add verbose() to the POST parameters for more info on the call
   # todo: filter weekend data out; check if a result is returned; test with lasso if model 3 is appropriate or perhaps a simpler model can be used e.g. where p4=1 <=> Brennan 92
-  xdata <- riskbutlerRadar::getData(request = list(class = "FX", base_currency = base_currency, currency = currency, frequency = "day", limit = 252))
+  freq <- "hour"
+  xdata <- riskbutlerRadar::getData(request = list(class = "FX", base_currency = base_currency, currency = currency, frequency = freq, limit = 252))
 
   ## . Estimate parameters
-  nsim <- 1000
-  sims <- riskbutlerRadar::simulate_all(xdata, T = 1/52, nsim = nsim, delta = 1/365)
+  if (freq == "hour") {
+    delta = 1/(365*24)
+  } else {
+    delta = 1/365
+  }
+
+  nsim <- 10000
+  sims <- riskbutlerRadar::simulate_all(xdata, T = 1/52, nsim = nsim, delta = delta)
   xinit <- xdata[length(xdata)]
 
   ## Make wanted statistics
@@ -44,19 +51,18 @@ aiUpdown <- function(result, ...) {
 }
 
 
-# Call from api.ai is something like
-# aiUpdown(id = "8c71919d-ebb6-467e-866f-0e05509afdde", timestamp = "2017-06-15T13:33:17.691Z",
-# lang = "en", result = result, status = status, sessionId = "somerandomthing")
+#' Note: only FX currently, and risk time horizon 1 calendar week (7 days), data is hourly, 10000 simulations, quantiles are 1 and 99 percent, market data window is 252
 
-#aiUpdown <- function(json_obj = '{"result": {"parameters": {"activity_financial": "import", "amount_currency": {"amount": 100, "currency": "GBP"}, "base_currency": "DKK", "date": "2017-12-10"}}}') {
+
+
+# Call from api.ai is something like
+# aiUpdown(id = "8c71919d-ebb6-467e-866f-0e05509afdde", timestamp = "2017-06-15T13:33:17.691Z", lang = "en", result = result, status = status, sessionId = "somerandomthing")
 
 #' ptm <- proc.time()
 #' aiUpdown()
 #' proc.time() - ptm
-#'
-#'
-#' #' @param activity_financial export, import, trade or invest (default export, string)
-#' #' @param base_currency ISO currency (default EUR, string)
-#' #' @param amount activity amount (default 100, number)
-#' #' @param currency activity ISO currency (default USD, string)
-#' #' @param date activity date (default now + 7 calendar days, date format "2017-09-10")
+
+
+
+#' activity_financial export, import, trade or invest (default export, string)
+#' activity date (default now + 7 calendar days, date format "2017-09-10")

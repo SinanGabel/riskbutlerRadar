@@ -1,21 +1,23 @@
 #' Estimates SDE parameters for a univariate time series, and simulates future values for this SDE
 #'
-#' Daily data for longer than 7 days risk time horizon, else hourly data (up to 7 days risk time horison)
 #'
 #' @param data univariate time series of type numeric
-#' @param T risk time horizon in years
-#' @param nsim number of simulations at time T
-#' @param delta data unit distance
-#' @return json
+#' @param T risk time horizon in years (default 1 year)
+#' @param nsim number of simulations at time T (default 100)
+#' @param delta data unit distance (default 1/252)
+#' @param neg_values in data, boolean (default FALSE)
+#' @return vector of double (numeric)
 #' @export
 #'
-simulate_all <- function(data, T = 1, nsim = 100, delta = 1/252)  {
+simulate_all <- function(data, T = 1, nsim = 100, delta = 1/252, neg_values = FALSE)  {
+
+  # ToDo: if neg_values in data => add constant = min(data) + 1
 
   ## . Estimate parameters
   # ycks model 3
   js <- jsonlite::fromJSON('{"start": {"p1": 1,"p2": 0.1,"p3": 0.1,"p4": 1}, "lower": {"p1": -100,"p2": 0,"p3": 0,"p4": 0}, "upper": {"p1": 100,"p2": 100,"p3": 1,"p4": 2}}')
-  win_less <- 4
-  qmle_step <- 2
+  win_less <- 0  # For 3 estimations choose e.g. w=4 and step=2, for 4 estimations choose e.g. w=6 and step=2 => default is one single estimation
+  qmle_step <- 1
 
   est <- riskbutlerRadar::yuima.qmle.seq(data = log(data), window = (length(data) - win_less), step = qmle_step, delta = delta, drift = "p1 * (p2 - x)", diffusion = "p3 * x^p4", hurst = 0.5, solve.variable = "x", method="L-BFGS-B",  start = js$start, lower = js$lower, upper = js$upper)
 
