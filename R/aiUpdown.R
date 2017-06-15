@@ -1,15 +1,16 @@
 #' Forecast of chance of profit and risk of loss for api.ai (this) updown financial activity agent
 #'
-#' @param json_obj json webhook object from api.ai
+#' @param result list of data from api.ai
 #' @return list
 #' @export
 #'
-aiUpdown <- function(json_obj = '{"result": {"parameters": {"activity_financial": "import", "amount_currency": {"amount": 100, "currency": "GBP"}, "base_currency": "DKK", "date": "2017-12-10"}}}') {
+aiUpdown <- function(result, ...) {
 
+  if (missing(result)) {
+    result <- jsonlite::fromJSON('{"parameters": {"activity_financial": "import", "amount_currency": {"amount": 100, "currency": "GBP"}, "base_currency": "DKK", "date": "2017-12-10"}}')
+  }
 
-  api <- jsonlite::fromJSON(json_obj, flatten = TRUE)
-
-  api <- api$result$parameters
+  api <- result$parameters
 
   # temporary
   base_currency <- api$base_currency
@@ -42,6 +43,10 @@ aiUpdown <- function(json_obj = '{"result": {"parameters": {"activity_financial"
   return(list(speech = txt, displayText = txt, source = jsonlite::unbox("riskbutler.net")))
 }
 
+
+# Call from api.ai is something like
+# aiUpdown(id = "8c71919d-ebb6-467e-866f-0e05509afdde", timestamp = "2017-06-15T13:33:17.691Z",
+# lang = "en", result = result, status = status, sessionId = "somerandomthing")
 
 #aiUpdown <- function(json_obj = '{"result": {"parameters": {"activity_financial": "import", "amount_currency": {"amount": 100, "currency": "GBP"}, "base_currency": "DKK", "date": "2017-12-10"}}}') {
 

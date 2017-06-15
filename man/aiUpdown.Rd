@@ -4,11 +4,10 @@
 \alias{aiUpdown}
 \title{Forecast of chance of profit and risk of loss for api.ai (this) updown financial activity agent}
 \usage{
-
-  aiUpdown(json_obj = "{\\"result\\": {\\"parameters\\": {\\"activity_financial\\": \\"import\\", \\"amount-currency\\": {\\"amount\\": 100, \\"currency\\": \\"GBP\\"}, \\"base-currency\\": \\"DKK\\", \\"date\\": \\"2017-12-10\\"}}}")
+aiUpdown(result, ...)
 }
 \arguments{
-\item{json_obj}{json webhook object from api.ai}
+\item{result}{list of data from api.ai}
 }
 \value{
 list
