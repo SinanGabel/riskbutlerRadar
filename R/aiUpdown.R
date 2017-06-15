@@ -4,7 +4,7 @@
 #' @return list
 #' @export
 #'
-aiUpdown <- function(json_obj = '{"result": {"parameters": {"activity_financial": "import", "amount-currency": {"amount": 100, "currency": "GBP"}, "base-currency": "DKK", "date": "2017-12-10"}}}') {
+aiUpdown <- function(json_obj = '{"result": {"parameters": {"activity_financial": "import", "amount_currency": {"amount": 100, "currency": "GBP"}, "base_currency": "DKK", "date": "2017-12-10"}}}') {
 
 
   api <- jsonlite::fromJSON(json_obj, flatten = TRUE)
@@ -12,8 +12,8 @@ aiUpdown <- function(json_obj = '{"result": {"parameters": {"activity_financial"
   api <- api$result$parameters
 
   # temporary
-  base_currency <- api$`base-currency`
-  currency <- api$`amount-currency`$currency
+  base_currency <- api$base_currency
+  currency <- api$amount_currency$currency
 
   ## . Check if results are already calculated and stored, else make new simulations; check if result and all parameters are there and correct;
 
