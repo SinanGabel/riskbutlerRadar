@@ -35,7 +35,11 @@ yuima.qmle.seq <- function(data, window = 100, step = 10, delta = 1/252, summary
   }
 
   # check for multivariate model
-  if (length(drift) > 1) {multi = TRUE}
+  if (length(drift) > 1) {
+    multi = TRUE
+  } else {
+    multi = FALSE
+  }
 
   # check foreach further: even, uneven indexes; vector or matrix etc.
   w <- window
