@@ -58,9 +58,9 @@ aiUpdown <- function(result, ...) {
 # Call from api.ai is something like
 # aiUpdown(id = "8c71919d-ebb6-467e-866f-0e05509afdde", timestamp = "2017-06-15T13:33:17.691Z", lang = "en", result = result, status = status, sessionId = "somerandomthing")
 
-#' ptm <- proc.time()
-#' aiUpdown()
-#' proc.time() - ptm
+# ptm <- proc.time()
+# aiUpdown()
+# proc.time() - ptm
 
 
 

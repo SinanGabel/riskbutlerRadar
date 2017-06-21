@@ -9,14 +9,14 @@
 #' @return vector of double (numeric)
 #' @export
 #'
-simulate_all <- function(data, T = 1, nsim = 100, delta = 1/252, neg_values = FALSE)  {
+simulate_all <- function(data, T = 1, nsim = 100, delta = 1/252, estimations = 3, neg_values = FALSE, multi_model = TRUE)  {
 
   # ToDo: if neg_values in data => add constant = min(data) + 1
 
   ## . Estimate parameters
   # ycks model 3
   js <- jsonlite::fromJSON('{"start": {"p1": 1,"p2": 0.1,"p3": 0.1,"p4": 1}, "lower": {"p1": -100,"p2": 0,"p3": 0,"p4": 0}, "upper": {"p1": 100,"p2": 100,"p3": 1,"p4": 2}}')
-  win_less <- 0  # For 3 estimations choose e.g. w=4 and step=2, for 4 estimations choose e.g. w=6 and step=2 => default is one single estimation
+  win_less <- estimations - 1  # For 3 estimations choose e.g. w=4 and step=2, for 4 estimations choose e.g. w=6 and step=2 => default is one single estimation
   qmle_step <- 1
 
   est <- riskbutlerRadar::yuima.qmle.seq(data = log(data), window = (length(data) - win_less), step = qmle_step, delta = delta, drift = "p1 * (p2 - x)", diffusion = "p3 * x^p4", hurst = 0.5, solve.variable = "x", method="L-BFGS-B",  start = js$start, lower = js$lower, upper = js$upper)

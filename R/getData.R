@@ -2,6 +2,8 @@
 #'
 #' FX: Always expressed as the value in base currency (this may not follow trading convention)
 #'
+#' ToDo: enable currency to take a list of currencies: c("USD","GBP",...), and to take any hour during day for daily data
+#'
 #' @param request list()
 #' @return vector of double (numeric)
 #' @export

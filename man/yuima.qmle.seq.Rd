@@ -39,6 +39,6 @@ yuima.qmle.seq(data, window = 100, step = 10, delta = 1/252,
 maximum likelihood estimation
 }
 \description{
-Currently univariate models, example given for GBM
+multivariate and univariate models, example given for GBM
 }
 

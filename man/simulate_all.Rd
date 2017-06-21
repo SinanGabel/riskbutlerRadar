@@ -4,7 +4,8 @@
 \alias{simulate_all}
 \title{Estimates SDE parameters for a univariate time series, and simulates future values for this SDE}
 \usage{
-simulate_all(data, T = 1, nsim = 100, delta = 1/252, neg_values = FALSE)
+simulate_all(data, T = 1, nsim = 100, delta = 1/252, estimations = 3,
+  neg_values = FALSE, multi_model = TRUE)
 }
 \arguments{
 \item{data}{univariate time series of type numeric}

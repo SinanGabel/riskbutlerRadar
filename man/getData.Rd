@@ -16,4 +16,7 @@ vector of double (numeric)
 \description{
 FX: Always expressed as the value in base currency (this may not follow trading convention)
 }
+\details{
+ToDo: enable currency to take a list of currencies: c("USD","GBP",...), and to take any hour during day for daily data
+}
 

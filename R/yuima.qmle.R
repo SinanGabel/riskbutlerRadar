@@ -21,8 +21,8 @@ yuima.qmle <- function(data, delta = 1/252, summary = TRUE, drift, diffusion, hu
   ymod <- yuima::setModel(drift = drift, diffusion = diffusion, hurst = hurst, solve.variable = solve.variable, state.variable = solve.variable)
 
   # valid to update data and yobj without changing ymod
-  data <- yuima::setData(data.frame(data), delta = delta)
-  yobj <- yuima::setYuima(model = ymod, data = data)
+  dat <- yuima::setData(data, delta = delta)
+  yobj <- yuima::setYuima(model = ymod, data = dat)
 
   # estimate
   # the likelihood function measures how likelihood a set of parameters is given the observed data

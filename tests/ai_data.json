@@ -1,0 +1,79 @@
+{
+  "id": "8c71919d-ebb6-467e-866f-0e05509afdde",
+  "timestamp": "2017-06-15T13:33:17.691Z",
+  "lang": "en",
+  "result": {
+    "source": "agent",
+    "resolvedQuery": "1234 JPY",
+    "action": "greetings.greetings-import",
+    "actionIncomplete": false,
+    "parameters": {
+      "activity_financial": "export",
+      "amount_currency": {
+        "amount": 1234,
+        "currency": "JPY"
+      },
+      "base_currency": "EUR",
+      "date": "2019-01-04"
+    },
+    "contexts": [
+      {
+        "name": "greetings-followup",
+        "parameters": {
+          "date": "2019-01-04",
+          "base_currency": "EUR",
+          "date.original": "January 4 2019",
+          "base_currency.original": "Eur",
+          "activity_financial": "export",
+          "amount_currency": {
+            "amount": 1234,
+            "currency": "JPY"
+          },
+          "amount_currency.original": "1234 JPY",
+          "activity_financial.original": "export"
+        },
+        "lifespan": 1
+      },
+      {
+        "name": "activity_type",
+        "parameters": {
+          "date": "2019-01-04",
+          "base_currency": "EUR",
+          "date.original": "January 4 2019",
+          "base_currency.original": "Eur",
+          "activity_financial": "export",
+          "amount_currency": {
+            "amount": 1234,
+            "currency": "JPY"
+          },
+          "amount_currency.original": "1234 JPY",
+          "activity_financial.original": "export"
+        },
+        "lifespan": 4
+      }
+    ],
+    "metadata": {
+      "intentId": "c90c7e54-411f-4f36-88b5-efecc4f0f773",
+      "webhookUsed": "true",
+      "webhookForSlotFillingUsed": "false",
+      "webhookResponseTime": 886,
+      "intentName": "greetings - import"
+    },
+    "fulfillment": {
+      "speech": "Good, I understand you want to export goods or services on 2019-01-04 and the value is 1234 JPY . Your basecurrency is EUR . Stay tuned for version with predictions from riskbutler.com.",
+      "messages": [
+        {
+          "type": 0,
+          "speech": "Good, I understand you want to export goods or services on 2019-01-04 and the value is 1234 JPY . Your basecurrency is EUR . Stay tuned for version with predictions from riskbutler.com."
+        }
+      ]
+    },
+    "score": 1
+  },
+  "status": {
+    "code": 206,
+    "errorType": "partial_content",
+    "errorDetails": "Webhook call failed. Error: Webhook response was empty."
+  },
+  "sessionId": "somerandomthing"
+}
