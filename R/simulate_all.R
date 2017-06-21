@@ -14,8 +14,8 @@ simulate_all <- function(data, T = 1, nsim = 100, delta = 1/252, estimations = 3
   # ToDo: if neg_values in data => add constant = min(data) + 1
 
   ## . Estimate parameters
-  # ycks model 3
-  js <- jsonlite::fromJSON('{"start": {"p1": 1,"p2": 0.1,"p3": 0.1,"p4": 1}, "lower": {"p1": -100,"p2": 0,"p3": 0,"p4": 0}, "upper": {"p1": 100,"p2": 100,"p3": 1,"p4": 2}}')
+  # ycks model 3 => stricktly reduces movement of p4 because we only have time to make one single estimation for 5 seconds timeout restriction on api.ai
+  js <- jsonlite::fromJSON('{"start": {"p1": 1,"p2": 0.1,"p3": 0.1,"p4": 1}, "lower": {"p1": -100,"p2": 0,"p3": 0,"p4": 0.75}, "upper": {"p1": 100,"p2": 100,"p3": 1,"p4": 1.25}}')
   win_less <- estimations - 1  # For 3 estimations choose e.g. w=4 and step=2, for 4 estimations choose e.g. w=6 and step=2 => default is one single estimation
   qmle_step <- 1
 

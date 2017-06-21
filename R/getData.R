@@ -42,25 +42,11 @@ getData <- function(request = list(class = "FX", base_currency = "EUR", currency
 }
 
 
-# getData(request = list(class = "FX", base_currency = "DKK", currency = "GBP", frequency = "day", limit = 100))
-#
-#
-# getData(request = list(class = "FX", base_currency = "USD", currency = "USD", frequency = "day", limit = 100))
-#
-#
-# getData(request = list(class = "FX", base_currency = "EUR", currency = "USD", frequency = "day", limit = 100))
-#
-# ptm <- proc.time()
-# dd <- getData(request = list(class = "FX", base_currency = "USD", currency = "EUR", frequency = "day", limit = 100))
-# proc.time() - ptm
-#
-# plot(dd)
+
 #
 # ptm <- proc.time()
 # dd <- getData(request = list(class = "FX", base_currency = "USD", currency = "EUR", frequency = "hour", limit = 100))
 # proc.time() - ptm
 #
-# plot(dd)
-
-
+# plot(dd, type="b")
 
