@@ -4,17 +4,21 @@
 \alias{simulate_all}
 \title{Estimates SDE parameters for a univariate time series, and simulates future values for this SDE}
 \usage{
-simulate_all(data, T = 1, nsim = 100, delta = 1/252, estimations = 3,
-  neg_values = FALSE, multi_model = TRUE)
+simulate_all(data, model = "you3", T = 1, nsim = 100, delta = 1/252,
+  estimations = 3, neg_values = FALSE)
 }
 \arguments{
 \item{data}{univariate time series of type numeric}
+
+\item{model}{yuima sde model (you3, yckls, yhdf)}
 
 \item{T}{risk time horizon in years (default 1 year)}
 
 \item{nsim}{number of simulations at time T (default 100)}
 
 \item{delta}{data unit distance (default 1/252)}
+
+\item{estimations}{integer, number of qmle estimations}
 
 \item{neg_values}{in data, boolean (default FALSE)}
 }

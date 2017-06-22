@@ -1,6 +1,7 @@
 #' An interface to the yuima::qmle function
 #'
 #' Univariate and multivariate models, example given for univariate GBM
+#' Optional paramters: method, lower, upper
 #'
 #' @param data  list(x=data) or list(x1=data1, x2=data2,...) possibly use log or return of data.
 #' @param delta  1 divided by the # of observations per year e.g. with business daily data typically: 1/252
@@ -10,9 +11,6 @@
 #' @param hurst 0.5
 #' @param solve.variable "x" or c("x1","x2")
 #' @param start  list(mu = 0.1, sigma = 0.1)
-#' @param method  [optional] "L-BFGS-B" with lower, upper and "BFGS" without bounds
-#' @param lower  [optional] list(mu = -1, sigma = 0)
-#' @param upper  [optional] list(mu = 1, sigma = 1)
 #' @return maximum likelihood estimation
 #' @export
 #'

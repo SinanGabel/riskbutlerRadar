@@ -23,17 +23,12 @@ yuima.qmle(data, delta = 1/252, summary = TRUE, drift, diffusion,
 \item{solve.variable}{"x" or c("x1","x2")}
 
 \item{start}{list(mu = 0.1, sigma = 0.1)}
-
-\item{method}{[optional] "L-BFGS-B" with lower, upper and "BFGS" without bounds}
-
-\item{lower}{[optional] list(mu = -1, sigma = 0)}
-
-\item{upper}{[optional] list(mu = 1, sigma = 1)}
 }
 \value{
 maximum likelihood estimation
 }
 \description{
 Univariate and multivariate models, example given for univariate GBM
+Optional paramters: method, lower, upper
 }
 

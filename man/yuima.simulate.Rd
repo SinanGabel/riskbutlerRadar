@@ -9,6 +9,8 @@ yuima.simulate(setseed = FALSE, sumsim = TRUE, nsim = 1, drift, diffusion,
   parameter, grid = NULL)
 }
 \arguments{
+\item{setseed}{boolean (default FALSE)}
+
 \item{sumsim}{sum simulations vertically (default TRUE)}
 
 \item{nsim}{number of simulations (default 1)}
@@ -27,7 +29,7 @@ yuima.simulate(setseed = FALSE, sumsim = TRUE, nsim = 1, drift, diffusion,
 
 \item{n}{number of trading times (default 1)}
 
-\item{parameter}{named list of parameters (name true.parameter in yuima).}
+\item{parameter}{named list of parameters (name true.parameter in yuima)}
 }
 \value{
 simulations

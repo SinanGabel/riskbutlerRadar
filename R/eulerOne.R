@@ -5,17 +5,28 @@
 #'
 #'
 #' @param xinit initial value vector of state variables (default 1, number)
+#' @param model sde model (you3, yckls, yhdf for yuima)
 #' @param Terminal (default 1 (year), positive number)
 #' @param nsim number of simulations (default 10, integer)
 #' @param parameter named list of parameters
 #' @return simulations
 #' @export
 #'
-eulerOne <- function (xinit = 1, Terminal = 1, nsim = 10,
-                      parameter = list(p1 = -0.04, p2 = 0.1, p3 = 0.23, p4 = 0.5)) {
+eulerOne <- function (xinit = 1, model = "you3", Terminal = 1, nsim = 10,
+                      parameter = list(p1 = -0.04, p2 = 0.1, p3 = 0.23)) {
 
-  drift <- substitute(p1 * (p2 - x), parameter)
-  diffusion <- substitute(p3 * x ^ p4, parameter)
+  if (model == "you3") {
+    drift <- substitute(p1 * (p2 - x), parameter)
+    diffusion <- substitute(p3 * x, parameter)
+
+  } else if (model == "yckls") {
+    drift <- substitute(p1 * (p2 - x), parameter)
+    diffusion <- substitute(p3 * x^p4, parameter)
+
+  } else if (model == "yhdf") {
+    drift <- substitute((p1^2)/2 * (p2 - p3 * x /sqrt(p4^2 + (x - p5)^2)), parameter)
+    diffusion <- substitute(p1, parameter)
+  }
 
   d1 <- function(x)
     eval(drift)

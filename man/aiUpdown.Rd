@@ -13,6 +13,6 @@ aiUpdown(result, ...)
 list
 }
 \description{
-Forecast of chance of profit and risk of loss for api.ai (this) updown financial activity agent
+Todo: use cron to pre-generate the most used data including the FX so-called majors, once per hour
 }
 

@@ -1,5 +1,7 @@
 #' Forecast of chance of profit and risk of loss for api.ai (this) updown financial activity agent
 #'
+#' Todo: use cron to pre-generate the most used data including the FX so-called majors, once per hour
+#'
 #' @param result list of data from api.ai
 #' @return list
 #' @export
@@ -23,33 +25,56 @@ aiUpdown <- function(result, ...) {
   } else {
 
     ## . Check if results are already calculated and stored, else make new simulations; check if result and all parameters are there and correct;
+    recalculate <- TRUE
+    dir_root <- "./inst/extdata/"
+    if (file.exists(paste(dir_root, base_currency, currency, ".json", sep = ""))) {
 
-    ## . Get market data
-    # tip: preload httr in opencpu
-    # tip: add date to fields to see actual data time stamps, and add verbose() to the POST parameters for more info on the call
-    # todo: filter weekend data out; check if a result is returned; test with lasso if model 3 is appropriate or perhaps a simpler model can be used e.g. where p4=1 <=> Brennan 92
-    freq <- "day"
-    xdata <- riskbutlerRadar::getData(request = list(class = "FX", base_currency = base_currency, currency = currency, frequency = freq, limit = 100))
+      json <- readLines(paste(dir_root, base_currency, currency, ".json", sep=""))
+      json <- jsonlite::fromJSON(json)
 
-    ## . Estimate parameters
-    if (freq == "hour") {
-      delta = 1/(365*24)
-    } else {
-      delta = 1/365
+      if ((as.POSIXct(json$time) + 3600) > Sys.time()) {
+        up <- json$up
+        down <- json$down
+        xinit <- json$price
+        recalculate <- FALSE
+      }
     }
 
-    nsim <- 10000
-    sims <- riskbutlerRadar::simulate_all(xdata, T = 1/12, nsim = nsim, delta = delta, estimations = 2)
-    xinit <- xdata[length(xdata)]
+    if (recalculate == TRUE) {
 
-    ## Make wanted statistics
-    sims <- sort(sims)
-    q <- 0.01
-    up <- (sims[round((1-q) * nsim)] - xinit)/xinit  # q * 100 percent chance of up = up, or more up
-    down <- abs((sims[round(q * nsim)] - xinit)/xinit)    # q * 100 percent chance of down = down, or further down
+      ## . Get market data
+      # tip: preload httr in opencpu
+      # tip: add date to fields to see actual data time stamps, and add verbose() to the POST parameters for more info on the call
+      # todo: filter weekend data out; check if a result is returned; test with lasso if model 3 is appropriate or perhaps a simpler model can be used e.g. where p4=1 <=> Brennan 92
+      freq <- "day"
+      xdata <- riskbutlerRadar::getData(request = list(class = "FX", base_currency = base_currency, currency = currency, frequency = freq, limit = 100))
 
-    ## Save results to db for next user
-    ## Return forecast info to api.ai
+      ## . Estimate parameters
+      if (freq == "hour") {
+        delta = 1/(365*24)
+      } else {
+        delta = 1/365
+      }
+
+      nsim <- 10000
+      sims <- riskbutlerRadar::simulate_all(xdata, model = "you3", T = 1/12, nsim = nsim, delta = delta, estimations = 2)
+      xinit <- xdata[length(xdata)]
+
+      ## Make wanted statistics
+      sims <- sort(sims)
+      q <- 0.01
+      up <- (sims[round((1-q) * nsim)] - xinit)/xinit  # q * 100 percent chance of up = up, or more up
+      down <- abs((sims[round(q * nsim)] - xinit)/xinit)    # q * 100 percent chance of down = down, or further down
+
+
+      # Save result for later
+      # Use sqlite3 instead, and/or pre-calculated estimations with latest market value saved <= setup cron to make these calculations every hour
+      # If no result, then call opencpu directly and present result as text
+      # note: files are overwrite
+      conn <- file(paste(dir_root, base_currency, currency, ".json", sep=""))
+      writeLines( paste('{"symbol": "',  base_currency, currency, '", "up": ', up, ', "down": ', down , ', "time": "', Sys.time(), '", "price": ', xinit, '}', sep = ""), conn)
+      close(conn)
+    }
 
     # Import and buy-side of trade will loose on FX changes if rate goes up, and vice versa for sell-side
     txt_ext <- ""
@@ -64,9 +89,11 @@ aiUpdown <- function(result, ...) {
       down <- tmp
     }
 
-    txt <- jsonlite::unbox(paste(txt_ext, "The 30 day chance of profit is", format(up * 100, digits = 2), "percent, and the risk of loss is", format(down * 100, digits = 2), "percent of the", api$activity_financial, "activity amount. To understand how this was calculated please go to riskbutler.com."))
+    txt <- jsonlite::unbox(paste(txt_ext, "The 30 day chance of profit is", format(up * 100, digits = 2), "percent, and the risk of loss is", format(down * 100, digits = 2), "percent of the", api$activity_financial, "activity amount. The latest", paste(base_currency, currency, sep="") ,"exchange rate is", format(xinit, digits = 4),"(info: sinan.gabel@riskbutler.com)."))
+
   }
 
+  # result
   return(list(speech = txt, displayText = txt, source = jsonlite::unbox("riskbutler.net")))
 }
 

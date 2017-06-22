@@ -4,11 +4,13 @@
 \alias{eulerOne}
 \title{A univariate euler simulation function for Chan et al. 1992 Stochastic Differential Equation}
 \usage{
-eulerOne(xinit = 1, Terminal = 1, nsim = 10, parameter = list(p1 =
-  -0.04, p2 = 0.1, p3 = 0.23, p4 = 0.5))
+eulerOne(xinit = 1, model = "you3", Terminal = 1, nsim = 10,
+  parameter = list(p1 = -0.04, p2 = 0.1, p3 = 0.23))
 }
 \arguments{
 \item{xinit}{initial value vector of state variables (default 1, number)}
+
+\item{model}{sde model (you3, yckls, yhdf for yuima)}
 
 \item{Terminal}{(default 1 (year), positive number)}
 

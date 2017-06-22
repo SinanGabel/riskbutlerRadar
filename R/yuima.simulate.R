@@ -2,6 +2,7 @@
 #'
 #' Multivariate models
 #'
+#' @param setseed boolean (default FALSE)
 #' @param sumsim  sum simulations vertically (default TRUE)
 #' @param nsim number of simulations (default 1)
 #' @param drift  (e.g."mu * x")
@@ -11,7 +12,8 @@
 #' @param xinit initial value vector of state variables (default 1)
 #' @param Terminal (default 1)
 #' @param n number of trading times (default 1)
-#' @param parameter named list of parameters (name true.parameter in yuima).
+#' @param parameter named list of parameters (name true.parameter in yuima)
+#' @param grid
 #' @return simulations
 #' @export
 #'

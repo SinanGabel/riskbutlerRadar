@@ -120,11 +120,12 @@ test_that("sqlite.sql", {
 test_that("eulerOne", {
 
   set.seed(123)
-  dd <- exp(eulerOne(xinit = log(100), Terminal = 1, nsim = 100, parameter = list(p1 = -0.03, p2 = 0.11, p3 = 0.2, p4 = 0.1)))
+  dd <- exp(eulerOne(xinit = log(100), model = "yckls", Terminal = 1, nsim = 100, parameter = list(p1 = -0.03, p2 = 0.11, p3 = 0.2, p4 = 0.1)))
 
   expect_true( abs(mean(dd) - 119.5292) < 1e-3)
   expect_true( abs(sd(dd) - 25.79993) < 1e-3)
 
 })
+
 
 

@@ -28,17 +28,12 @@ yuima.qmle.seq(data, window = 100, step = 10, delta = 1/252,
 \item{solve.variable}{"x" or c("x1","x2")}
 
 \item{start}{list(mu = 0.10, sigma = 0.1)}
-
-\item{method}{[optional] "L-BFGS-B" with lower, upper and "BFGS" without bounds}
-
-\item{lower}{[optional] list(mu = 0, sigma = 0)}
-
-\item{upper}{[optional] list(mu = 0.50, sigma = 1)}
 }
 \value{
 maximum likelihood estimation
 }
 \description{
 multivariate and univariate models, example given for GBM
+optional parameters: method, lower, upper
 }
 
