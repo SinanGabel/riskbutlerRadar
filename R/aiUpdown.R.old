@@ -17,22 +17,23 @@ aiUpdown <- function(result, ...) {
   # temporary
   base_currency <- api$base_currency
   currency <- api$amount_currency$currency
-  symbol <- paste(base_currency, currency, sep = "")
 
   if (base_currency == currency) {
 
-    txt <- jsonlite::unbox(paste("There is no foreign exchange risk on your", api$activity_financial, "activity because the base currency", base_currency, " and activity currency", currency, " are the same. To understand how this was calculated please go to riskbutler.com."))
+    txt <- jsonlite::unbox(paste("There is no foreign exchange risk on your", api$activity_financial, "activity because the base currency and activity currency are the same. To understand how this was calculated please go to riskbutler.com."))
 
   } else {
 
     ## . Check if results are already calculated and stored, else make new simulations; check if result and all parameters are there and correct;
     recalculate <- TRUE
-    db <- "/home/local/sql/rdata.db"
-    sql <- sqlite.sql(url = db, stmt = paste('select * from fx where name = "', symbol, '" order by date desc limit 1', sep = ""))
 
-    if (nrow(sql) > 0) {
+    #dir_root <- "./inst/extdata/"
+    dir_root <- "/tmp/rdata/"
 
-      json <- jsonlite::fromJSON(sql$est)
+    if (file.exists(paste(dir_root, base_currency, currency, ".json", sep = ""))) {
+
+      json <- readLines(paste(dir_root, base_currency, currency, ".json", sep=""))
+      json <- jsonlite::fromJSON(json)
 
       if ((as.POSIXct(json$time) + 3600) > Sys.time()) {
         up <- json$up
@@ -70,12 +71,12 @@ aiUpdown <- function(result, ...) {
 
 
       # Save result for later
-      # Use pre-calculated estimations with latest market value saved <= setup cron to make these calculations every hour
+      # Use sqlite3 instead, and/or pre-calculated estimations with latest market value saved <= setup cron to make these calculations every hour
       # If no result, then call opencpu directly and present result as text
-      dt <- Sys.time()
-      value <- paste('{"symbol": "',  symbol, '", "up": ', up, ', "down": ', down , ', "time": "', dt, '", "price": ', xinit, '}', sep = "")
-      stmt <- paste('insert into fx (name, date, est) values("', symbol, '", "', dt, '", json(\'', value, '\'))', sep = "")
-      sqlite.sql(url = db, stmt = stmt)
+      # note: files are overwrite
+      conn <- file(paste(dir_root, base_currency, currency, ".json", sep=""))
+      writeLines( paste('{"symbol": "',  base_currency, currency, '", "up": ', up, ', "down": ', down , ', "time": "', Sys.time(), '", "price": ', xinit, '}', sep = ""), conn)
+      close(conn)
     }
 
     # Import and buy-side of trade will loose on FX changes if rate goes up, and vice versa for sell-side
@@ -91,7 +92,7 @@ aiUpdown <- function(result, ...) {
       down <- tmp
     }
 
-    txt <- jsonlite::unbox(paste(txt_ext, "The 30 day chance of profit is", format(up * 100, digits = 2), "percent, and the risk of loss is", format(down * 100, digits = 2), "percent of the", api$activity_financial, "activity amount. The latest", symbol ,"exchange rate is", format(xinit, digits = 4),"(info: sinan.gabel@riskbutler.com)."))
+    txt <- jsonlite::unbox(paste(txt_ext, "The 30 day chance of profit is", format(up * 100, digits = 2), "percent, and the risk of loss is", format(down * 100, digits = 2), "percent of the", api$activity_financial, "activity amount. The latest", paste(base_currency, currency, sep="") ,"exchange rate is", format(xinit, digits = 4),"(info: sinan.gabel@riskbutler.com)."))
 
   }
 
