@@ -26,7 +26,7 @@ yuima.qmle.seq <- function(data, window = 100, step = 10, delta = 1/252, summary
     l <- seq(1, n - w + s, s)
 
     if ((l[length(l)] + w - 1) > n ) {
-      l[length(l)] = n - w + 1
+      l[length(l)] <- n - w + 1
     }
 
     return(l)
@@ -34,9 +34,9 @@ yuima.qmle.seq <- function(data, window = 100, step = 10, delta = 1/252, summary
 
   # check for multivariate model
   if (length(drift) > 1) {
-    multi = TRUE
+    multi <- TRUE
   } else {
-    multi = FALSE
+    multi <- FALSE
   }
 
   # check foreach further: even, uneven indexes; vector or matrix etc.

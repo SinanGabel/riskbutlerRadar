@@ -27,7 +27,7 @@ aiUpdown <- function(result, ...) {
 
     ## . Check if results are already calculated and stored, else make new simulations; check if result and all parameters are there and correct;
     recalculate <- TRUE
-    db <- "/home/local/sql/rdata.db"
+    db <- "/var/sql/rdata.db"
     sql <- sqlite.sql(url = db, stmt = paste('select * from fx where name = "', symbol, '" order by date desc limit 1', sep = ""))
 
     if (nrow(sql) > 0) {
@@ -53,13 +53,13 @@ aiUpdown <- function(result, ...) {
 
       ## . Estimate parameters
       if (freq == "hour") {
-        delta = 1/(365*24)
+        delta <- 1/(365*24)
       } else {
-        delta = 1/365
+        delta <- 1/365
       }
 
       nsim <- 10000
-      sims <- riskbutlerRadar::simulate_all(xdata, model = "you3", T = 1/12, nsim = nsim, delta = delta, estimations = 2)
+      sims <- riskbutlerRadar::simulate_all(xdata, model = "you3", T = 1/12, nsim = nsim, delta = delta, estimations = 1)
       xinit <- xdata[length(xdata)]
 
       ## Make wanted statistics
@@ -107,7 +107,7 @@ aiUpdown <- function(result, ...) {
 # Call from api.ai is something like
 # aiUpdown(id = "8c71919d-ebb6-467e-866f-0e05509afdde", timestamp = "2017-06-15T13:33:17.691Z", lang = "en", result = result, status = status, sessionId = "somerandomthing")
 
-# aiUpdown(jsonlite::fromJSON('{"parameters": {"activity_financial": "import", "amount_currency": {"amount": 100, "currency": "GBP"}, "base_currency": "DKK", "date": "2017-12-10"}}'))
+# ptm <- proc.time(); aiUpdown(jsonlite::fromJSON('{"parameters": {"activity_financial": "import", "amount_currency": {"amount": 100, "currency": "GBP"}, "base_currency": "DKK", "date": "2017-12-10"}}')); proc.time() - ptm
 
 # ptm <- proc.time()
 # aiUpdown()

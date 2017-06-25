@@ -11,7 +11,7 @@
       "activity_financial": "export",
       "amount_currency": {
         "amount": 1234,
-        "currency": "JPY"
+        "currency": "CHF"
       },
       "base_currency": "EUR",
       "date": "2019-01-04"

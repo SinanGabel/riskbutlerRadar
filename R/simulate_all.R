@@ -20,17 +20,17 @@ simulate_all <- function(data, model = "you3", T = 1, nsim = 100, delta = 1/252,
 
   # log transform
   if ((max(data) - mini)/mini > 0.02) {
-    take_log = TRUE
-    data = log(data)
+    take_log <- TRUE
+    data <- log(data)
     xinit <- log(xinit)
 
   # normalisation
   } else {
-    take_log = FALSE
-    avg = mean(data)
-    std = sd(data)
-    data = (data - avg)/std
-    xinit = 1
+    take_log <- FALSE
+    avg <- mean(data)
+    std <- sd(data)
+    data <- (data - avg)/std
+    xinit <- 1
   }
 
   ## . Estimate parameters
