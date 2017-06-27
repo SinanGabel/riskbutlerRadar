@@ -91,7 +91,7 @@ aiUpdown <- function(result, ...) {
       down <- tmp
     }
 
-    txt <- jsonlite::unbox(paste(txt_ext, "The 30 day chance of profit is", format(up * 100, digits = 2), "percent, and the risk of loss is", format(down * 100, digits = 2), "percent of the", api$activity_financial, "activity amount. The latest", symbol ,"exchange rate is", format(xinit, digits = 4),"(info: sinan.gabel@riskbutler.com)."))
+    txt <- jsonlite::unbox(paste(txt_ext, "The 30 day chance of profit is", format(up * 100, digits = 2), "percent and the risk of loss is", format(down * 100, digits = 2), "percent of the", api$activity_financial, "activity amount. The latest foreign exchange price is", base_currency, format(xinit, digits = 4), "=", currency, "1.0000. Info: sinan.gabel@riskbutler.com."))
 
   }
 

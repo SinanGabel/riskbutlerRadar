@@ -13,7 +13,7 @@
         "amount": 1234,
         "currency": "CHF"
       },
-      "base_currency": "EUR",
+      "base_currency": "USD",
       "date": "2019-01-04"
     },
     "contexts": [
