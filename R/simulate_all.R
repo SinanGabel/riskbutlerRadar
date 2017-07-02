@@ -10,6 +10,7 @@
 #' @param neg_values in data, boolean (default FALSE)
 #' @return vector of double (numeric)
 #' @export
+#' @importFrom stats sd
 #'
 simulate_all <- function(data, model = "you3", T = 1, nsim = 100, delta = 1/252, estimations = 3, neg_values = FALSE)  {
 

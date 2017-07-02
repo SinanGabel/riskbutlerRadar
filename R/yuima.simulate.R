@@ -17,7 +17,6 @@
 #' @return simulations
 #' @export
 #'
-#'
 yuima.simulate <- function(setseed = FALSE, sumsim = TRUE, nsim = 1, drift, diffusion, hurst = 0.5, solve.variable = "x", xinit = 1, Terminal = 1, n = 100, parameter, grid = NULL) {
 
   ymod <- yuima::setModel(drift = drift, diffusion = diffusion, hurst = hurst, solve.variable = solve.variable, state.variable = solve.variable, xinit = xinit)

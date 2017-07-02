@@ -13,31 +13,41 @@ aiUpdown <- function(result, ...) {
   }
 
   api <- result$parameters
+  info <- "Info: sinan.gabel@riskbutler.com"
 
   # temporary
   base_currency <- api$base_currency
   currency <- api$amount_currency$currency
   symbol <- paste(base_currency, currency, sep = "")
+  symbol_t <- paste(currency, base_currency, sep = "")
 
   if (base_currency == currency) {
 
-    txt <- jsonlite::unbox(paste("There is no foreign exchange risk on your", api$activity_financial, "activity because the base currency", base_currency, " and activity currency", currency, " are the same. To understand how this was calculated please go to riskbutler.com."))
+    txt <- jsonlite::unbox(paste("There is no foreign exchange risk on your", api$activity_financial, "activity because the base currency", base_currency, " and activity currency", currency, " are the same.", info))
 
   } else {
 
     ## . Check if results are already calculated and stored, else make new simulations; check if result and all parameters are there and correct;
     recalculate <- TRUE
     db <- "/var/sql/rdata.db"
-    sql <- sqlite.sql(url = db, stmt = paste('select * from fx where name = "', symbol, '" order by date desc limit 1', sep = ""))
+    #sql <- sqlite.sql(url = db, stmt = paste('select * from fx where name = "', symbol, '" order by date desc limit 1', sep = ""))
+    sql <- sqlite.sql(url = db, stmt = paste('select * from fx where name in ( "', symbol, '", "', symbol_t ,'") order by date desc limit 1', sep = ""))
 
     if (nrow(sql) > 0) {
 
       json <- jsonlite::fromJSON(sql$est)
 
       if ((as.POSIXct(json$time) + 3600) > Sys.time()) {
-        up <- json$up
-        down <- json$down
-        xinit <- json$price
+        if (json$name == symbol) {
+          up <- json$up
+          down <- json$down
+          xinit <- json$price
+        # Think of Y (USDDKK) as being the reverse quantiles of 1/X (DKKUSD)
+        } else {
+          up <- json$down
+          down <- json$up
+          xinit <- 1/json$price
+        }
         recalculate <- FALSE
       }
     }
@@ -91,7 +101,7 @@ aiUpdown <- function(result, ...) {
       down <- tmp
     }
 
-    txt <- jsonlite::unbox(paste(txt_ext, "The 30 day chance of profit is", format(up * 100, digits = 2), "percent and the risk of loss is", format(down * 100, digits = 2), "percent of the", api$activity_financial, "activity amount. The latest foreign exchange price is", base_currency, format(xinit, digits = 4), "=", currency, "1.0000. Info: sinan.gabel@riskbutler.com."))
+    txt <- jsonlite::unbox(paste(txt_ext, "The foreign exchange 30 day chance of profit is", format(abs(up) * 100, digits = 2), "percent and the risk of loss is", format(abs(down) * 100, digits = 2), "percent of the", api$activity_financial, "activity amount. The latest foreign exchange price is", base_currency, format(xinit, digits = 4), "=", currency, "1.0000.", info))
 
   }
 

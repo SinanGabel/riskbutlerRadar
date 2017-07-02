@@ -6,6 +6,7 @@
 #' @param data multivariate data time series for multivariate modelling
 #' @return list
 #' @export
+#' @importFrom stats cor
 #'
 yuima.sde <- function(model = "you3", multivariate = FALSE, correlated = FALSE, data) {
 

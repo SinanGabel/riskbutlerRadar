@@ -11,6 +11,7 @@ LazyData: TRUE
 Imports:
     RSQLite,
     yuima,
+    stats,
     stats4,
     jsonlite,
     foreach,
