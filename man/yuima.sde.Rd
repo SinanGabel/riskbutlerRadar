@@ -7,7 +7,7 @@
 yuima.sde(model = "you3", multivariate = FALSE, correlated = FALSE, data)
 }
 \arguments{
-\item{model}{(you3, yckls, yhdf)}
+\item{model}{(you3, yckls, yhdf_b2)}
 
 \item{multivariate}{boolean}
 
@@ -19,6 +19,7 @@ yuima.sde(model = "you3", multivariate = FALSE, correlated = FALSE, data)
 list
 }
 \description{
-yuima.sde returns parameters for some specific (yuima) sde models
+Warning: dependency in eulerOne()
+ToDo: add heston model
 }
 

@@ -11,6 +11,8 @@
 #
 
 library(testthat)
+library(stats)
+library(jsonlite)
 library(stats4)
 library(yuima)
 library(DBI)
@@ -23,13 +25,25 @@ context("riskbutlerRadar tests")
 test_that("yuima.qmle", {
 
   set.seed(123)
-  ar <- 100*exp(rnorm(100, mean=0, sd=0.10))
-  X <- yuima.qmle(data = log(ar), delta = 1, summary = FALSE, drift = "mu * x", diffusion = "sigma * x", hurst = 0.5, solve.variable = "x", method="L-BFGS-B", start = list(mu = 0.10, sigma = 0.1), lower = list(mu = 0, sigma = 0), upper = list(mu = 0.50, sigma = 1))
+  ar <- yuima.simulate(setseed = FALSE, sumsim = FALSE, nsim = 1, drift = "mu * x", diffusion = "sigma * x", xinit = 100, hurst = 0.5, solve.variable = "x", Terminal = 1, n = 365, parameter = list(mu = 0.1, sigma = 0.07))
+  X <- yuima.qmle(data = ar, delta = 1/365, summary = FALSE, drift = "mu * x", diffusion = "sigma * x", hurst = 0.5, solve.variable = "x", method="L-BFGS-B", start = list(mu = 0.10, sigma = 0.1), lower = list(mu = 0, sigma = 0), upper = list(mu = 0.50, sigma = 1))
   X <- stats4::summary(X)
   X <- as.data.frame(X@coef)
 
-  expect_that( abs(X$Estimate[1] - 0.1041014143) < 1e-5, is_true() )
-  expect_that( abs(X$Estimate[2] - 0.0002923041) < 1e-5, is_true() )
+  expect_that( abs(X$Estimate[1] - 0.06774496 ) < 1e-5, is_true() )
+  expect_that( abs(X$Estimate[2] - 0.14480042) < 1e-5, is_true() )
+
+  # simulate
+  set.seed(123)
+  X <- yuima.simulate(setseed = TRUE, sumsim = FALSE, nsim = 1, drift = "mu * x", diffusion = "sigma * x", xinit = 100, hurst = 0.5, solve.variable = "x", Terminal = 1, n = 500, parameter = list(mu = 0.1, sigma = 0.07))
+
+  # estimate once
+  est <- yuima.qmle(data = X, delta = 1/500, summary = FALSE, drift = "mu * x", diffusion = "sigma * x", hurst = 0.5, solve.variable = "x", method="L-BFGS-B", start = list(mu = 0.15, sigma = 0.15), lower = list(mu = -0.5, sigma = 0), upper = list(mu = 0.5, sigma = 1))
+
+  est <- as.list(est@coef)
+
+  expect_true( abs(est$mu - 0.1560092) < 1e-3)
+  expect_true( abs(est$sigma - 0.06807577) < 1e-3)
 
   # See below: simulate multi
   # multi
@@ -71,27 +85,39 @@ test_that("yuima.simulate", {
 test_that("yuima.qmle.seq", {
 
   # simulate
+  set.seed(123)
   X <- yuima.simulate(setseed = TRUE, sumsim = FALSE, nsim = 1, drift = "mu * x", diffusion = "sigma * x", xinit = 100, hurst = 0.5, solve.variable = "x", Terminal = 1, n = 500, parameter = list(mu = 0.1, sigma = 0.07))
 
-  # estimate once
-  est <- yuima.qmle(data = X, delta = 1/500, summary = FALSE, drift = "mu * x", diffusion = "sigma * x", hurst = 0.5, solve.variable = "x", method="L-BFGS-B", start = list(mu = 0.15, sigma = 0.15), lower = list(mu = -0.5, sigma = 0), upper = list(mu = 0.5, sigma = 1))
+  # estimate sequence of windows of length=100 (default) and steps=10 (default)
+  est <- yuima.qmle.seq(data = X, window = 500, step = 10, delta = 1/500, summary = TRUE, drift = "mu * x", diffusion = "sigma * x", hurst = 0.5, solve.variable = "x", method="L-BFGS-B", start = list(mu = 0.15, sigma = 0.15), lower = list(mu = -0.5, sigma = 0), upper = list(mu = 0.5, sigma = 1))
 
-  est <- as.list(est@coef)
+  expect_true( abs(est$coef$mu - 0.1560092) < 1e-3)
+  expect_true( abs(est$coef$sigma - 0.06807577) < 1e-3)
 
-  expect_true( abs(est$mu - 0.1556972) < 1e-3)
-  expect_true( abs(est$sigma - 0.06801812) < 1e-3)
+  est <- yuima.qmle.seq(data = X, window = 100, step = 10, delta = 1/500, summary = TRUE, drift = "mu * x", diffusion = "sigma * x", hurst = 0.5, solve.variable = "x", method="L-BFGS-B", start = list(mu = 0.15, sigma = 0.15), lower = list(mu = -0.5, sigma = 0), upper = list(mu = 0.5, sigma = 1))
+
+  expect_true( abs(mean(est$coef$mu) -  0.1213351) < 1e-3)
+  expect_true( abs(mean(est$coef$sigma) - 0.06836215) < 1e-3)
 
   # estimate sequence of windows of length=100 (default) and steps=10 (default)
-  est <- yuima.qmle.seq(data = X, delta = 1/500, summary = FALSE, drift = "mu * x", diffusion = "sigma * x", hurst = 0.5, solve.variable = "x", method="L-BFGS-B", start = list(mu = 0.15, sigma = 0.15), lower = list(mu = -0.5, sigma = 0), upper = list(mu = 0.5, sigma = 1))
+  est <- yuima.qmle.seq(data = X, window = 125, step = 5, delta = 1/500, summary = TRUE, drift = "mu * x", diffusion = "sigma * x", hurst = 0.5, solve.variable = "x", method="L-BFGS-B", start = list(mu = 0.15, sigma = 0.15), lower = list(mu = -0.5, sigma = 0), upper = list(mu = 0.5, sigma = 1))
 
-  expect_true( abs(mean(est[1,]) - 0.06801815) < 1e-3)
-  expect_true( abs(mean(est[2,]) - 0.1201217) < 1e-3)
+  expect_true( abs(mean(est$coef$mu) - 0.1209253) < 1e-3)
+  expect_true( abs(mean(est$coef$sigma) - 0.06849526) < 1e-3)
 
-  # estimate sequence of windows of length=100 (default) and steps=10 (default)
-  est <- yuima.qmle.seq(data = X, window = 125, step = 5, delta = 1/500, summary = FALSE, drift = "mu * x", diffusion = "sigma * x", hurst = 0.5, solve.variable = "x", method="L-BFGS-B", start = list(mu = 0.15, sigma = 0.15), lower = list(mu = -0.5, sigma = 0), upper = list(mu = 0.5, sigma = 1))
+  # ...
+  md <- yuima.sde(model = "yckls")
+  est <- yuima.qmle.seq(data = X, window = 125, step = 5, delta = 1/500, summary = TRUE, drift = md$drift, diffusion = md$diffusion, hurst = 0.5, solve.variable = "x", method="L-BFGS-B", start = md$slu$start, lower = md$slu$lower, upper = md$slu$upper)
 
-  expect_true( abs(mean(est[1,]) - 0.06822156) < 1e-3)
-  expect_true( abs(mean(est[2,]) - 0.1199579) < 1e-3)
+  expect_true( abs(mean(est$coef$p1) + 0.3254493) < 1e-3)
+  expect_true( abs(mean(est$coef$p2) - 9.039045) < 1e-3)
+  expect_true( abs(mean(est$coef$p3) - 0.5958237) < 1e-3)
+  expect_true( abs(mean(est$coef$p4) - 0.6632483) < 1e-3)
+
+  # ...
+  json <- readLines("~/git-private/riskbutlerRadar/tests/sde_1.json")
+  json <- jsonlite::fromJSON(json)
+  est <- yuima.qmle.seq(data = json$data, window = 100, step = 50, delta = 1/500, summary = TRUE, drift = md$drift, diffusion = md$diffusion, hurst = 0.5, solve.variable = "x", method="L-BFGS-B", start = md$slu$start, lower = md$slu$lower, upper = md$slu$upper)
 
 })
 
@@ -124,6 +150,30 @@ test_that("eulerOne", {
 
   expect_true( abs(mean(dd) - 119.5292) < 1e-3)
   expect_true( abs(sd(dd) - 25.79993) < 1e-3)
+
+})
+
+
+test_that("simulate_all", {
+
+  dd <- read.csv("~/git-private/riskbutlerRadar/tests/marketdata_daily_base_DKK.csv")
+
+  set.seed(123)
+  sims <- simulate_all(dd$chf, model = "you3", T = 1/12, nsim = 10000, delta = 1/365, estimations = 5)
+  expect_true( sum((summary(sims) - as.numeric(c(6.618,   6.835,   6.881,   6.882,   6.929,   7.157)))^2) < 1e-3)
+
+  set.seed(123)
+  sims <- simulate_all(dd$chf, model = "yhdf_b2", T = 1/12, nsim = 10000, delta = 1/365, estimations = 5)
+  expect_true( sum((summary(sims) - as.numeric(c( 6.573,   6.791,   6.837,   6.838,   6.885,   7.113 )))^2) < 1e-3)
+
+
+  set.seed(123)
+  sims <- simulate_all(dd$sek, model = "you3", T = 1/12, nsim = 10000, delta = 1/365, estimations = 5)
+  expect_true( sum((summary(sims) - as.numeric(c(0.7140,  0.7522,  0.7598,  0.7598,  0.7672,  0.7993)))^2) < 1e-3)
+
+  set.seed(123)
+  sims <- simulate_all(dd$sek, model = "yhdf_b2", T = 1/12, nsim = 10000, delta = 1/365, estimations = 5)
+  expect_true( sum((summary(sims) - as.numeric(c(0.7215,  0.7551,  0.7626,  0.7625,  0.7698,  0.8057 )))^2) < 1e-3)
 
 })
 

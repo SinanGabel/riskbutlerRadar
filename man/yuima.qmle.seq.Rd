@@ -6,7 +6,7 @@
 \usage{
 yuima.qmle.seq(data, window = 100, step = 10, delta = 1/252,
   summary = TRUE, drift, diffusion, hurst = 0.5, solve.variable = "x",
-  start, ...)
+  start, method = "L-BFGS-B", lower, upper)
 }
 \arguments{
 \item{data}{list(x=data) or list(x1=data1, x2=data2,...) possibly use log or return of data.}

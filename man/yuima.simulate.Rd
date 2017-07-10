@@ -30,6 +30,8 @@ yuima.simulate(setseed = FALSE, sumsim = TRUE, nsim = 1, drift, diffusion,
 \item{n}{number of trading times (default 1)}
 
 \item{parameter}{named list of parameters (name true.parameter in yuima)}
+
+\item{grid}{for setSampling}
 }
 \value{
 simulations

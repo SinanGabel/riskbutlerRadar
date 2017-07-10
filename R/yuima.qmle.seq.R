@@ -17,7 +17,8 @@
 #' @export
 #' @importFrom foreach %do%
 #'
-yuima.qmle.seq <- function(data, window = 100, step = 10, delta = 1/252, summary = TRUE, drift, diffusion, hurst = 0.5, solve.variable = "x", start, ...) {
+yuima.qmle.seq <- function(data, window = 100, step = 10, delta = 1/252, summary = TRUE, drift, diffusion, hurst = 0.5, solve.variable = "x", start, method = "L-BFGS-B", lower, upper) {
+#yuima.qmle.seq <- function(data, window = 100, step = 10, delta = 1/252, summary = TRUE, drift, diffusion, hurst = 0.5, solve.variable = "x", start, ...) {
 
   ymod <- yuima::setModel(drift = drift, diffusion = diffusion, hurst = hurst, solve.variable = solve.variable, state.variable = solve.variable)
 
@@ -51,20 +52,33 @@ yuima.qmle.seq <- function(data, window = 100, step = 10, delta = 1/252, summary
   #l <- seq(1, n - w + step, step)
   l <- sekvens(n, w, step)
 
-  est = start
+  mydata <- function(data, multi = FALSE, sek = sek) {
+    if (multi == FALSE) {
+      dd <- data[sek]
+    } else {
+      dd <- data[sek,]
+    }
+    return(dd)
+  }
+
+  est = as.list(start)
+
   # parallel %dopar% or %do%
   #r <- foreach::foreach(i=l, .combine = cbind, .packages="foreach") %do% {
   r <- foreach::foreach(i = l, .combine = cbind) %do% {
 
-    if (multi == FALSE) {
-      dat <- data[seq(i, i+w-1)]
-    } else {
-      dat <- data[seq(i, i+w-1),]
-    }
+    #if (multi == FALSE) {
+    #dat <- data[seq(i, i+w-1)]
+    # dat <- yuima::setData(data[seq(i, i+w-1)], delta = delta)
+    #} else {
+    #dat <- data[seq(i, i+w-1),]
+    # dat <- yuima::setData(data[seq(i, i+w-1),], delta = delta)
+    #}
 
-    dat <- yuima::setData(dat, delta = delta)
+    dat <- yuima::setData(mydata(data, multi, seq(i, i+w-1)), delta = delta)
     yobj <- yuima::setYuima(model = ymod, data = dat)
-    res <- yuima::qmle(yobj, start = est, ...)
+    #res <- yuima::qmle(yobj, start = est, ...)
+    res <- yuima::qmle(yobj, start = est, method = "L-BFGS-B", lower = lower, upper = upper)
 
     # To use estimates as start values in next or other qmle estimation set: start = as.list(res@coef)
     est <- as.list(res@coef)
@@ -72,7 +86,6 @@ yuima.qmle.seq <- function(data, window = 100, step = 10, delta = 1/252, summary
   }
 
   if (summary == TRUE)
-    #return(jsonlite::toJSON(list( call = list(seq = l, w = w, step = step, n = n), coef = as.data.frame(t(r)))))
     return(list( call = list(seq = l, w = w, step = step, n = n), coef = as.data.frame(t(r))))
   else
     return(r)

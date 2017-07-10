@@ -10,7 +10,7 @@ eulerOne(xinit = 1, model = "you3", Terminal = 1, nsim = 10,
 \arguments{
 \item{xinit}{initial value vector of state variables (default 1, number)}
 
-\item{model}{sde model (you3, yckls, yhdf for yuima)}
+\item{model}{sde model (you3, yckls, yhdf_b2 for yuima)}
 
 \item{Terminal}{(default 1 (year), positive number)}
 
@@ -24,5 +24,6 @@ simulations
 \description{
 It can be updated to take any kind of SDE model
 Simulates only at the (future) Terminal (trading time) point
+Warning: dependent on yuima.sde() models/parameters
 }
 

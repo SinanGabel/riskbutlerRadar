@@ -13,7 +13,7 @@
 #' @param Terminal (default 1)
 #' @param n number of trading times (default 1)
 #' @param parameter named list of parameters (name true.parameter in yuima)
-#' @param grid
+#' @param grid for setSampling
 #' @return simulations
 #' @export
 #'

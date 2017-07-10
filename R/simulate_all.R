@@ -40,7 +40,7 @@ simulate_all <- function(data, model = "you3", T = 1, nsim = 100, delta = 1/252,
   win_less <- estimations - 1  # For 3 estimations choose e.g. w=4 and step=2, for 4 estimations choose e.g. w=6 and step=2 => default is one single estimation
   qmle_step <- 1
 
-  est <- riskbutlerRadar::yuima.qmle.seq(data = data, window = (length(data) - win_less), step = qmle_step, delta = delta, drift = p$drift, diffusion = p$diffusion, hurst = 0.5, solve.variable = p$solve.variable, method="L-BFGS-B",  start = p$slu$start, lower = p$slu$lower, upper = p$slu$upper)
+  est <- riskbutlerRadar::yuima.qmle.seq(data = data, window = (length(data) - win_less), step = qmle_step, delta = delta, drift = p$drift, diffusion = p$diffusion, hurst = 0.5, solve.variable = p$solve.variable, start = p$slu$start, method="L-BFGS-B", lower = p$slu$lower, upper = p$slu$upper)
 
   # . Simulate
   coef_i <- win_less/qmle_step + 1

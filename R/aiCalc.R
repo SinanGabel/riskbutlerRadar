@@ -1,56 +1,50 @@
 #' Forecast of chance of profit and risk of loss for api.ai (this) updown financial activity agent
 #'
-#' Todo: use cron to pre-generate the most used data including the FX so-called majors, once per hour
+#' Todo: use cron to pre-generate model parameter estimations
 #'
 #' @param result list of data from api.ai
 #' @return list
 #' @export
 #'
-aiUpdown <- function(result, ...) {
+aiCalc <- function(result) {
 
   if (missing(result)) {
     result <- jsonlite::fromJSON('{"parameters": {"activity_financial": "import", "amount_currency": {"amount": 100, "currency": "GBP"}, "base_currency": "DKK", "date": "2017-12-10"}}')
   }
 
   api <- result$parameters
-  info <- "Info: sinan.gabel@riskbutler.com"
 
   # temporary
   base_currency <- api$base_currency
   currency <- api$amount_currency$currency
   symbol <- paste(base_currency, currency, sep = "")
-  symbol_t <- paste(currency, base_currency, sep = "")
 
   if (base_currency == currency) {
 
-    txt <- jsonlite::unbox(paste("There is no foreign exchange risk on your", api$activity_financial, "activity because the base currency", base_currency, " and activity currency", currency, " are the same.", info))
+    return(list(risk = FALSE))
 
   } else {
 
     ## . Check if results are already calculated and stored, else make new simulations; check if result and all parameters are there and correct;
     recalculate <- TRUE
     db <- "/var/sql/rdata.db"
-    #sql <- sqlite.sql(url = db, stmt = paste('select * from fx where name = "', symbol, '" order by date desc limit 1', sep = ""))
-    sql <- sqlite.sql(url = db, stmt = paste('select * from fx where name in ( "', symbol, '", "', symbol_t ,'") order by date desc limit 1', sep = ""))
+    sql <- sqlite.sql(url = db, stmt = paste('select * from fx where name = "', symbol, '" order by date desc limit 1', sep = ""))
 
     if (nrow(sql) > 0) {
 
       json <- jsonlite::fromJSON(sql$est)
 
+      # Only recalculate if at least one hour has passed
       if ((as.POSIXct(json$time) + 3600) > Sys.time()) {
-        if (json$name == symbol) {
-          up <- json$up
-          down <- json$down
-          xinit <- json$price
-        # Think of Y (USDDKK) as being the reverse quantiles of 1/X (DKKUSD)
-        } else {
-          up <- json$down
-          down <- json$up
-          xinit <- 1/json$price
-        }
         recalculate <- FALSE
+        xinit <- json$price
+        up <- json$up
+        down <- json$down
       }
     }
+
+    # remove in production, for test only
+    #recalculate <- TRUE
 
     if (recalculate == TRUE) {
 
@@ -101,12 +95,12 @@ aiUpdown <- function(result, ...) {
       down <- tmp
     }
 
-    txt <- jsonlite::unbox(paste(txt_ext, "The foreign exchange 30 day chance of profit is", format(abs(up) * 100, digits = 2), "percent and the risk of loss is", format(abs(down) * 100, digits = 2), "percent of the", api$activity_financial, "activity amount. The latest foreign exchange price is", base_currency, format(xinit, digits = 4), "=", currency, "1.0000.", info))
+    txt <- jsonlite::unbox(paste(txt_ext, "Due to foreign exchange changes, the 30 day chance of profit is", format(up * 100, digits = 2), "percent and the risk of loss is", format(down * 100, digits = 2), "percent of the", api$activity_financial, "activity amount. The latest foreign exchange price is", base_currency, format(xinit, digits = 4), "=", currency, "1.0000.", info))
 
   }
 
   # result
-  return(list(speech = txt, displayText = txt, source = jsonlite::unbox("riskbutler.net")))
+  return(list(risk = TRUE, up = up, down = down, xinit = xinit, symbol = symbol))
 }
 
 
