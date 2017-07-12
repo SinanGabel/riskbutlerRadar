@@ -13,6 +13,6 @@ aiCalc(result)
 list
 }
 \description{
-Todo: use cron to pre-generate model parameter estimations
+Todo: use cron to pre-generate model parameter estimations, always use latest estimations as start values
 }
 

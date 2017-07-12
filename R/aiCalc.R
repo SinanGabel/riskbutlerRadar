@@ -1,6 +1,6 @@
 #' Forecast of chance of profit and risk of loss for api.ai (this) updown financial activity agent
 #'
-#' Todo: use cron to pre-generate model parameter estimations
+#' Todo: use cron to pre-generate model parameter estimations, always use latest estimations as start values
 #'
 #' @param result list of data from api.ai
 #' @return list
@@ -9,10 +9,11 @@
 aiCalc <- function(result) {
 
   if (missing(result)) {
-    result <- jsonlite::fromJSON('{"parameters": {"activity_financial": "import", "amount_currency": {"amount": 100, "currency": "GBP"}, "base_currency": "DKK", "date": "2017-12-10"}}')
+    result <- jsonlite::fromJSON('{"parameters": {"risk_type": "fx", "activity_financial": "import", "amount_currency": {"amount": 100, "currency": "GBP"}, "base_currency": "DKK", "date": "2017-12-10"}}')
   }
 
   api <- result$parameters
+  recalculate <- TRUE
 
   # temporary
   base_currency <- api$base_currency
@@ -21,12 +22,11 @@ aiCalc <- function(result) {
 
   if (base_currency == currency) {
 
-    return(list(risk = FALSE))
+    return(list(up = 0, down = 0, xinit = 1, symbol = symbol))
 
   } else {
 
     ## . Check if results are already calculated and stored, else make new simulations; check if result and all parameters are there and correct;
-    recalculate <- TRUE
     db <- "/var/sql/rdata.db"
     sql <- sqlite.sql(url = db, stmt = paste('select * from fx where name = "', symbol, '" order by date desc limit 1', sep = ""))
 
@@ -36,12 +36,14 @@ aiCalc <- function(result) {
 
       # Only recalculate if at least one hour has passed
       if ((as.POSIXct(json$time) + 3600) > Sys.time()) {
-        recalculate <- FALSE
         xinit <- json$price
         up <- json$up
         down <- json$down
+
+        recalculate <- FALSE
       }
     }
+  }
 
     # remove in production, for test only
     #recalculate <- TRUE
@@ -82,25 +84,8 @@ aiCalc <- function(result) {
       sqlite.sql(url = db, stmt = stmt)
     }
 
-    # Import and buy-side of trade will loose on FX changes if rate goes up, and vice versa for sell-side
-    txt_ext <- ""
-    if (api$activity_financial == "import") {
-      tmp <- up
-      up <- down
-      down <- tmp
-    } else if (api$activity_financial == "invest" | api$activity_financial == "trade") {
-      txt_ext <- paste("For the buy-side of the", api$activity_financial, "activity: ")
-      tmp <- up
-      up <- down
-      down <- tmp
-    }
-
-    txt <- jsonlite::unbox(paste(txt_ext, "Due to foreign exchange changes, the 30 day chance of profit is", format(up * 100, digits = 2), "percent and the risk of loss is", format(down * 100, digits = 2), "percent of the", api$activity_financial, "activity amount. The latest foreign exchange price is", base_currency, format(xinit, digits = 4), "=", currency, "1.0000.", info))
-
-  }
-
   # result
-  return(list(risk = TRUE, up = up, down = down, xinit = xinit, symbol = symbol))
+  return(list(up = up, down = down, xinit = xinit, symbol = symbol))
 }
 
 
@@ -109,15 +94,15 @@ aiCalc <- function(result) {
 
 
 # Call from api.ai is something like
-# aiUpdown(id = "8c71919d-ebb6-467e-866f-0e05509afdde", timestamp = "2017-06-15T13:33:17.691Z", lang = "en", result = result, status = status, sessionId = "somerandomthing")
+# aiCalc(id = "8c71919d-ebb6-467e-866f-0e05509afdde", timestamp = "2017-06-15T13:33:17.691Z", lang = "en", result = result, status = status, sessionId = "somerandomthing")
 
-# ptm <- proc.time(); aiUpdown(jsonlite::fromJSON('{"parameters": {"activity_financial": "import", "amount_currency": {"amount": 100, "currency": "GBP"}, "base_currency": "DKK", "date": "2017-12-10"}}')); proc.time() - ptm
+# ptm <- proc.time(); aiCalc(jsonlite::fromJSON('{"parameters": {"activity_financial": "import", "amount_currency": {"amount": 100, "currency": "GBP"}, "base_currency": "DKK", "date": "2017-12-10"}}')); proc.time() - ptm
 
 # ptm <- proc.time()
-# aiUpdown()
+# aiCalc()
 # proc.time() - ptm
 
-
+# aiCalc(jsonlite::fromJSON('{"parameters": {"activity_financial": "trade", "amount_currency": {"amount": 100, "currency": "GBP"}, "base_currency": "USD", "date": "2017-12-10"}}'))
 
 #' activity_financial export, import, trade or invest (default export, string)
 #' activity date (default now + 7 calendar days, date format "2017-09-10")
