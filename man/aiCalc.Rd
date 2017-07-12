@@ -4,10 +4,10 @@
 \alias{aiCalc}
 \title{Forecast of chance of profit and risk of loss for api.ai (this) updown financial activity agent}
 \usage{
-aiCalc(result)
+aiCalc(json)
 }
 \arguments{
-\item{result}{list of data from api.ai}
+\item{json}{parameters data from api.ai}
 }
 \value{
 list

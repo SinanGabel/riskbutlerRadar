@@ -2,17 +2,17 @@
 #'
 #' Todo: use cron to pre-generate model parameter estimations, always use latest estimations as start values
 #'
-#' @param result list of data from api.ai
+#' @param json parameters data from api.ai
 #' @return list
 #' @export
 #'
-aiCalc <- function(result) {
+aiCalc <- function(json) {
 
-  if (missing(result)) {
-    result <- jsonlite::fromJSON('{"parameters": {"risk_type": "fx", "activity_financial": "import", "amount_currency": {"amount": 100, "currency": "GBP"}, "base_currency": "DKK", "date": "2017-12-10"}}')
+  if (missing(json)) {
+    json <- jsonlite::fromJSON('{"risk_type": "fx", "activity_financial": "import", "amount_currency": {"amount": 100, "currency": "GBP"}, "base_currency": "DKK", "date": "2017-12-10"}')
   }
 
-  api <- result$parameters
+  api <- json
   recalculate <- TRUE
 
   # temporary

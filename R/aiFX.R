@@ -4,7 +4,7 @@
 #' @return list
 #' @export
 #'
-aiFX <- function(result) {
+aiFX <- function(result, ...) {
 
   if (missing(result)) {
     result <- jsonlite::fromJSON('{"parameters": {"risk_type": "fx", "activity_financial": "import", "amount_currency": {"amount": 100, "currency": "GBP"}, "base_currency": "DKK", "date": "2017-12-10"}}')
@@ -23,7 +23,7 @@ aiFX <- function(result) {
   } else {
 
 
-    calc <- aiCalc(result)
+    calc <- aiCalc(api)
 
     # Export
     up <- calc$up
@@ -66,6 +66,7 @@ aiFX <- function(result) {
 
 # aiFX(jsonlite::fromJSON('{"parameters": {"activity_financial": "trade", "amount_currency": {"amount": 100, "currency": "USD"}, "base_currency": "GBP", "date": "2017-12-10"}}'));
 
+# aiFX(jsonlite::fromJSON('{"parameters": {"activity_financial": "trade", "amount_currency": {"amount": 100, "currency": "USD"}, "base_currency": "NOK", "date": "2017-12-10"}, "something": "else"}'));
 
 #' activity_financial export, import, trade or invest (default export, string)
 #' activity date (default now + 7 calendar days, date format "2017-09-10")
