@@ -8,7 +8,7 @@
 #' @return vector of double (numeric)
 #' @export
 #'
-getData <- function(request = list(class = "FX", base_currency = "EUR", currency = "USD", frequency = "day", limit = 100)) {
+getData <- function(request = list(class = "FX", base_currency = "EUR", currency = "USD", frequency = "day", limit = 100, host = "http://localhost:5984")) {
 
   if (request$class == "FX") {
 
@@ -31,7 +31,7 @@ getData <- function(request = list(class = "FX", base_currency = "EUR", currency
 
       body <- list(selector = sel, fields = fields, limit = request$limit, sort = jsonlite::fromJSON('[{"_id": "desc"}]'))
 
-      r <- httr::POST("https://riskbutler.net/fx1/_find", body = body, encode = "json")
+      r <- httr::POST(paste(request$host, "/fx1/_find", sep = ""), body = body, encode = "json")
 
       ## . Transform data
       rates <- jsonlite::fromJSON(rawToChar(r$content), flatten = TRUE)
@@ -45,7 +45,7 @@ getData <- function(request = list(class = "FX", base_currency = "EUR", currency
 
 #
 # ptm <- proc.time()
-# dd <- getData(request = list(class = "FX", base_currency = "USD", currency = "EUR", frequency = "hour", limit = 100))
+#dd <- getData(request = list(class = "FX", base_currency = "USD", currency = "EUR", frequency = "day", limit = 100, host = "https://riskbutler.net"))
 # proc.time() - ptm
 #
 # plot(dd, type="b")

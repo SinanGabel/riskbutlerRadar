@@ -5,7 +5,7 @@
 \title{Gets latest available (our sources) univariate financial market data}
 \usage{
 getData(request = list(class = "FX", base_currency = "EUR", currency = "USD",
-  frequency = "day", limit = 100))
+  frequency = "day", limit = 100, host = "http://localhost:5984"))
 }
 \arguments{
 \item{request}{list()}

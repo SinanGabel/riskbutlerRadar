@@ -55,7 +55,7 @@ aiCalc <- function(json) {
       # tip: add date to fields to see actual data time stamps, and add verbose() to the POST parameters for more info on the call
       # todo: filter weekend data out; check if a result is returned; test with lasso if model 3 is appropriate or perhaps a simpler model can be used e.g. where p4=1 <=> Brennan 92
       freq <- "day"
-      xdata <- riskbutlerRadar::getData(request = list(class = "FX", base_currency = base_currency, currency = currency, frequency = freq, limit = 100))
+      xdata <- riskbutlerRadar::getData(request = list(class = "FX", base_currency = base_currency, currency = currency, frequency = freq, limit = 100, host = "http://localhost:5984"))
 
       ## . Estimate parameters
       if (freq == "hour") {
